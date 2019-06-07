@@ -58,9 +58,9 @@ class Plugger {
     if (!Object.keys(this[plugs]).includes(name)) {
       var required = plug.getRequiredPlugs();
       for (var x in required) {
-        var required_name = required[x].getName();
-        if (!this[plugs][required_name]) {
-          throw new Error('Required Plug not found! -> ' + required_name);    
+        var required_name = required[x];
+        if (typeof this[plugs][required_name] === 'undefined') {
+          throw new Error(`Required Plug not found! -> ${required_name}`);    
         }
       }
       this[plugs][name] = plug;
