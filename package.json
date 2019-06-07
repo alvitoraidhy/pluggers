@@ -1,6 +1,6 @@
 {
   "name": "pluggers",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Something that helps ExpressJS Apps",
   "main": "index.js",
   "scripts": {
