@@ -1,0 +1,14 @@
+{
+  "name": "pluggers",
+  "version": "0.0.1",
+  "description": "Something that helps ExpressJS Apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --reporter list"
+  },
+  "author": "icarus213",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^6.1.4"
+  }
+}
