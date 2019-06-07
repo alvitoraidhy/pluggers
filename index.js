@@ -1,5 +1,6 @@
 const assert = require('assert');
 
+const plug_init = Symbol('plug_init');
 const plug_parent = Symbol('plug_parent');
 const plug_name = Symbol('plug_name');
 const required_plugs = Symbol('required_plugs');
@@ -14,10 +15,11 @@ class Plugger {
       throw new TypeError('Plug name must be string!');
     }
 
-    this[plug_parent] = null
+    this[plug_parent] = null;
     this[plug_name] = name;
     this[plugs] = {};
     this[required_plugs] = [];
+    this[plug_init] = function() {;};
   }
 
   getName() {return this[plug_name];}
@@ -63,6 +65,7 @@ class Plugger {
       }
       this[plugs][name] = plug;
       plug.setParent(this);
+      plug.initPlug();
       return true;
     }
     else {
@@ -116,6 +119,20 @@ class Plugger {
       this[required_plugs].push(name);
     }
     return true;
+  }
+
+  setInit(func) {
+    if (typeof func === "function") {
+      this[plug_init] = func;
+      return true;
+    }
+    else {
+      throw new TypeError('Must be a function!');
+    }
+  }
+
+  initPlug() {
+    return this[plug_init]();
   }
 }
 

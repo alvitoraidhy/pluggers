@@ -38,6 +38,12 @@ describe('The Plugger class', function() {
   it('should have \'requirePlug\' method', function() {
     assert.strictEqual(Plugger.prototype.requirePlug instanceof Function, true);
   });
+  it('should have \'setInit\' method', function() {
+    assert.strictEqual(Plugger.prototype.setInit instanceof Function, true);
+  });
+  it('should have \'initPlug\' method', function() {
+    assert.strictEqual(Plugger.prototype.initPlug instanceof Function, true);
+  });
 });
 
 var parent = new Plugger('parent');
@@ -75,12 +81,20 @@ describe('The Plugger instance', function() {
     assert.strictEqual(parent.getPlug('children'), children);
   });
 
-  it('should be able require a Plug (requirePlug)', function() {
+  it('should be able to require a Plug (requirePlug)', function() {
     assert.strictEqual(parent.requirePlug('required'), true);
   });
 
-  it('should be able remove a required Plug (removeRequiredPlug)', function() {
+  it('should be able to remove a required Plug (removeRequiredPlug)', function() {
     parent.removeRequiredPlug('required');
     assert.deepStrictEqual(parent.getRequiredPlugs(), []);
+  });
+
+  it('should be able to set init function and execute it (setInit & initPlug)', function() {
+    var children3 = new Plugger('children_test');
+    var test_sting = "Init function not executed"
+    children3.setInit(function() {test_sting = 'Init function executed'})
+    parent.addPlug(children3);
+    assert.strictEqual(test_sting, 'Init function executed');
   });
 });
