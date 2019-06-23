@@ -14,7 +14,7 @@ npm install --save pluggers
 
 ## Usage
 
-*master.js*
+*./master.js*
 ```javascript
 const Plugger = require('pluggers');
 
@@ -26,7 +26,7 @@ master.addPlug(__dirname + '/plugin-1');
 master.addPlug(__dirname + '/plugin-2');
 ```
 
-*plugin-1.js*
+*./plugin-1.js*
 ```javascript
 const Plugger = require('pluggers');
 
@@ -36,9 +36,11 @@ plug.setInit(function() {
   var current = plug.getParent();
   current.test = "Hello World!";
 });
+
+module.exports = plug;
 ```
 
-*plugin-2.js*
+*./plugin-2.js*
 ```javascript
 const Plugger = require('pluggers');
 
@@ -52,6 +54,8 @@ plug.setInit(function() {
   var current = plug.getParent();
   console.log(current.test); // Prints "Hello World!"
 });
+
+module.exports = plug;
 ```
 
 ## API
