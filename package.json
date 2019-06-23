@@ -1,13 +1,21 @@
 {
   "name": "pluggers",
   "version": "0.1.1",
-  "description": "Something that helps ExpressJS Apps",
+  "description": "A simple plugin manager library.",
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter list"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/icarus213/pluggers.git"
+  },
   "author": "icarus213",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/icarus213/pluggers/issues"
+  },
+  "homepage": "https://github.com/icarus213/pluggers#readme",
   "devDependencies": {
     "mocha": "^6.1.4"
   }
