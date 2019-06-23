@@ -23,6 +23,7 @@ class Plugger {
   }
 
   getName() {return this[plug_name];}
+
   setName(name) {
     if (!isString(name)) {
       throw new TypeError('Plug name must be string!');
@@ -33,6 +34,7 @@ class Plugger {
   }
 
   getParent() {return this[plug_parent];}
+
   setParent(parent) {
     if (!isPlug(parent)) {
       throw new TypeError('Parent must be a Plugger instance!')
@@ -72,6 +74,7 @@ class Plugger {
       throw new Error('A Plug with the same name already exists!');
     }
   }
+
   removePlug(plug) {
     if (isString(plug)) {
       plug = require(plug);
@@ -92,6 +95,7 @@ class Plugger {
       throw new Error('Plug instance not found!');
     }
   }
+
   getPlug(name) {
     if (!isString(name)) {
       throw new TypeError('Plug name must be string!');
@@ -108,13 +112,21 @@ class Plugger {
   getRequiredPlugs() {
     return this[required_plugs];
   }
+
   removeRequiredPlug(name) {
+    if (!isString(name)) {
+      throw new TypeError('Plug name must be string!');
+    }
     if (this[required_plugs].indexOf(name) > -1) {
       this[required_plugs].splice(name, 1);
     }
     return true;
   }
+
   requirePlug(name) {
+    if (!isString(name)) {
+      throw new TypeError('Plug name must be string!');
+    }
     if (!this[required_plugs].indexOf(name) > -1) {
       this[required_plugs].push(name);
     }
