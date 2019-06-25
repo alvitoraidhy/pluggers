@@ -60,10 +60,13 @@ describe('The Plugger instance', function() {
     parent.setName('new_name');
     assert.strictEqual(parent.getName(), 'new_name');
   });
-  it('should be able to add other Plug (addPlug)', function() {
+  it('should be able to add other Plug from instance (addPlug)', function() {
     assert.strictEqual(parent.addPlug(children), true);
     assert.strictEqual(parent.addPlug(children2), true);
     assert.strictEqual(children.getParent(), parent);
+  });
+  it('should be able to add other Plug from path (addPlug)', function() {
+    assert.strictEqual(parent.addPlug(__dirname + '/child_plug'), true);
   });
   it('shouldn\'t be able to add other Plug with the same name as another inserted Plug (addPlug)', function() {
     var result;

@@ -18,5 +18,6 @@
   "homepage": "https://github.com/icarus213/pluggers#readme",
   "devDependencies": {
     "mocha": "^6.1.4"
-  }
+  },
+  "dependencies": {}
 }

@@ -1,5 +1,3 @@
-const assert = require('assert');
-
 const plug_init = Symbol('plug_init');
 const plug_parent = Symbol('plug_parent');
 const plug_name = Symbol('plug_name');
