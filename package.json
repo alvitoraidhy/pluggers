@@ -1,21 +1,21 @@
 {
   "name": "pluggers",
   "version": "0.2.2",
-  "description": "A simple plugin manager library.",
+  "description": "A simple plugin manager library",
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter list"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/icarus213/pluggers.git"
+    "url": "git+https://github.com/alvitoraidhy/pluggers.git"
   },
-  "author": "icarus213",
+  "author": "alvitoraidhy",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/icarus213/pluggers/issues"
+    "url": "https://github.com/alvitoraidhy/pluggers/issues"
   },
-  "homepage": "https://github.com/icarus213/pluggers#readme",
+  "homepage": "https://github.com/alvitoraidhy/pluggers#readme",
   "devDependencies": {
     "mocha": "^6.1.4"
   },
