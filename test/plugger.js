@@ -1,103 +1,127 @@
 const assert = require('assert');
 const Plugger = require('../index');
 
-describe('The Plugger class', function() {
-  it('should be a class (Object)', function() {
-    assert.strictEqual(Plugger instanceof Object, true);
-  });
-  it('should have \'getName\' method', function() {
-    assert.strictEqual(Plugger.prototype.getName instanceof Function, true);
-  });
-  it('should have \'setName\' method', function() {
-    assert.strictEqual(Plugger.prototype.setName instanceof Function, true);
-  });
-  it('should have \'getParent\' method', function() {
-    assert.strictEqual(Plugger.prototype.getParent instanceof Function, true);
-  });
-  it('should have \'setParent\' method', function() {
-    assert.strictEqual(Plugger.prototype.setParent instanceof Function, true);
-  });
-  it('should have \'getPlugs\' method', function() {
-    assert.strictEqual(Plugger.prototype.getPlugs instanceof Function, true);
-  });
-  it('should have \'addPlug\' method', function() {
-    assert.strictEqual(Plugger.prototype.addPlug instanceof Function, true);
-  });
-  it('should have \'removePlug\' method', function() {
-    assert.strictEqual(Plugger.prototype.removePlug instanceof Function, true);
-  });
-  it('should have \'getPlug\' method', function() {
-    assert.strictEqual(Plugger.prototype.getPlug instanceof Function, true);
-  });
-  it('should have \'getRequiredPlugs\' method', function() {
-    assert.strictEqual(Plugger.prototype.getRequiredPlugs instanceof Function, true);
-  });
-  it('should have \'removeRequiredPlug\' method', function() {
-    assert.strictEqual(Plugger.prototype.removeRequiredPlug instanceof Function, true);
-  });
-  it('should have \'requirePlug\' method', function() {
-    assert.strictEqual(Plugger.prototype.requirePlug instanceof Function, true);
-  });
-  it('should have \'setInit\' method', function() {
-    assert.strictEqual(Plugger.prototype.setInit instanceof Function, true);
-  });
-  it('should have \'initPlug\' method', function() {
-    assert.strictEqual(Plugger.prototype.initPlug instanceof Function, true);
-  });
-});
+const parent = new Plugger('parent');
+const child = new Plugger('child');
+const childSameName = new Plugger('child');
+const child2 = new Plugger('child2');
+child2.requirePlugin('required');
+const requiredPlugin = new Plugger('required');
 
-var parent = new Plugger('parent');
-var children = new Plugger('children');
-var children_same_name = new Plugger('children');
-var children2 = new Plugger('children2');
-var required_plug = new Plugger('required');
-
-describe('The Plugger instance', function() {
-  it('should be able to return a correct name (getName)', function() {
-    assert.strictEqual(parent.getName(), 'parent');
-  });
-  it('should be able to change name (setName)', function() {
-    parent.setName('new_name');
-    assert.strictEqual(parent.getName(), 'new_name');
-  });
-  it('should be able to add other Plug from instance (addPlug)', function() {
-    assert.strictEqual(parent.addPlug(children), true);
-    assert.strictEqual(parent.addPlug(children2), true);
-    assert.strictEqual(children.getParent(), parent);
-  });
-  it('should be able to add other Plug from path (addPlug)', function() {
-    assert.strictEqual(parent.addPlug(__dirname + '/child_plug'), true);
-  });
-  it('shouldn\'t be able to add other Plug with the same name as another inserted Plug (addPlug)', function() {
-    var result;
-    try {
-      parent.addPlug(children_same_name);
-      result = 'Plug inserted'
-    }
-    catch(err) {
-      result = 'Error thrown'
-    }
-    assert.strictEqual(result, 'Error thrown');
+describe('Plugger', () => {
+  describe('#getName()', () => {
+    it('should return the plugin\'s name', () => {
+      assert.strictEqual(parent.getName(), 'parent');
+    });
   });
 
-  it('should be able to get inserted Plug (getPlug)', function() {
-    assert.strictEqual(parent.getPlug('children'), children);
+  describe('#setName(name: string)', () => {
+    it('should change the plugin\'s name properly', () => {
+      parent.setName('new_name');
+      assert.strictEqual(parent.getName(), 'new_name');
+    });
   });
 
-  it('should be able to require a Plug (requirePlug)', function() {
-    assert.strictEqual(parent.requirePlug('required'), true);
+  describe('#addPlugin(plugin: Plugger | string)', () => {
+    it('should load a plugin from its instance (plugin: Plugger)', () => {
+      assert.strictEqual(parent.addPlugin(child), true);
+      assert.strictEqual(child.getParent(), parent);
+    });
+
+    it('should load a plugin from its module path (plugin: string)', () => {
+      assert.strictEqual(parent.addPlugin(`${__dirname}/childPlugin`), true);
+    });
+
+    it('should load a plugin when its required plugin(s) is loaded', () => {
+      assert.strictEqual(parent.addPlugin(requiredPlugin), true);
+      assert.strictEqual(parent.addPlugin(child2), true);
+      assert.strictEqual(child2.getParent(), parent);
+    });
+
+    it('should throw an error when a required plugin(s) is not loaded', () => {
+      let result;
+      try {
+        parent.addPlugin(child2);
+        result = 'Plugin loaded';
+      } catch (err) {
+        result = 'Error thrown';
+      }
+      assert.strictEqual(result, 'Error thrown');
+    });
+
+    it('should throw an error when another plugin with the same name is already loaded', () => {
+      let result;
+      try {
+        parent.addPlugin(childSameName);
+        result = 'Plugin loaded';
+      } catch (err) {
+        result = 'Error thrown';
+      }
+      assert.strictEqual(result, 'Error thrown');
+    });
   });
 
-  it('should be able to remove a required Plug (removeRequiredPlug)', function() {
-    parent.removeRequiredPlug('required');
-    assert.deepStrictEqual(parent.getRequiredPlugs(), []);
+  describe('#getPlugin(name: string)', () => {
+    it('should return the requested loaded plugin', () => {
+      assert.strictEqual(parent.getPlugin('child'), child);
+    });
+
+    it('should return null when the requested plugin is not loaded', () => {
+      assert.strictEqual(parent.getPlugin('nonexistent'), null);
+    });
   });
 
-  it('should be able to set init function and execute it (setInit & initPlug)', function() {
-    var children3 = new Plugger('children_test');
-    var test_sting = "Init function not executed"
-    children3.setInit(function() {test_sting = 'Init function executed'})
-    parent.addPlug(children3);
-    assert.strictEqual(test_sting, 'Init function executed');
+  describe('#removePlugin(plugin: Plugger | string)', () => {
+    it('should unload the requested loaded plugin', () => {
+      assert.strictEqual(parent.removePlugin(child), true);
+      assert.strictEqual(child.getParent(), null);
+    });
+
+    it('should throw an error when the requested plugin is not loaded', () => {
+      let result;
+      try {
+        parent.removePlugin('nonexistent');
+        result = 'Plugin removed';
+      } catch (err) {
+        result = 'Error thrown';
+      }
+      assert.strictEqual(result, 'Error thrown');
+    });
+  });
+
+  describe('#requirePlugin(name: string)', () => {
+    it('should add the requested plugin requirement', () => {
+      assert.strictEqual(parent.requirePlugin('required'), true);
+    });
+  });
+
+  describe('#removeRequiredPlugin(name: string)', () => {
+    it('should remove the requested plugin requirement', () => {
+      parent.removeRequiredPlugin('required');
+      assert.deepStrictEqual(parent.getRequiredPlugins(), []);
+    });
+  });
+
+  const child3 = new Plugger('child_test');
+  let testString = 'Init function not executed';
+
+  describe('#setInit(func: function)', () => {
+    it('should set its own init function', () => {
+      child3.setInit(() => { testString = 'Init function executed'; });
+    });
+  });
+
+  describe('#initPlugin()', () => {
+    it('should execute its own init function', () => {
+      child3.initPlugin();
+      assert.strictEqual(testString, 'Init function executed');
+    });
+
+    testString = 'Init function not executed';
+
+    it('should execute its own init function when loaded', () => {
+      parent.addPlugin(child3);
+      assert.strictEqual(testString, 'Init function executed');
+    });
   });
 });

@@ -4,7 +4,7 @@
   "description": "A simple plugin manager library",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter list"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/alvitoraidhy/pluggers#readme",
   "devDependencies": {
-    "mocha": "^6.1.4"
-  },
-  "dependencies": {}
+    "eslint": "^7.24.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "mocha": "^8.3.2"
+  }
 }

@@ -1,149 +1,155 @@
-const plug_init = Symbol('plug_init');
-const plug_parent = Symbol('plug_parent');
-const plug_name = Symbol('plug_name');
-const required_plugs = Symbol('required_plugs');
-const plugs = Symbol('plugs');
+/* eslint-disable import/no-dynamic-require */
+/* eslint-disable global-require */
+const pluginInit = Symbol('pluginInit');
+const pluginParent = Symbol('pluginParent');
+const pluginName = Symbol('pluginName');
+const requredPlugins = Symbol('requredPlugins');
+const plugins = Symbol('plugins');
 
-const isString = function(str) {return typeof str === 'string' || str instanceof String;}
-const isPlug = function(instance) {return instance instanceof Plugger}
+const isString = (str) => typeof str === 'string' || str instanceof String;
 
 class Plugger {
   constructor(name) {
     if (!isString(name)) {
-      throw new TypeError('Plug name must be string!');
+      throw new TypeError(`${name} is not a string`);
     }
 
-    this[plug_parent] = null;
-    this[plug_name] = name;
-    this[plugs] = {};
-    this[required_plugs] = [];
-    this[plug_init] = function() {;};
+    this[pluginParent] = null;
+    this[pluginName] = name;
+    this[plugins] = {};
+    this[requredPlugins] = [];
+    this[pluginInit] = () => {};
   }
 
-  getName() {return this[plug_name];}
+  getName() { return this[pluginName]; }
 
   setName(name) {
     if (!isString(name)) {
-      throw new TypeError('Plug name must be string!');
+      throw new TypeError(`${name} is not a string`);
     }
 
-    this[plug_name] = name;
+    this[pluginName] = name;
     return true;
   }
 
-  getParent() {return this[plug_parent];}
+  getParent() { return this[pluginParent]; }
 
   setParent(parent) {
-    if (!isPlug(parent)) {
-      throw new TypeError('Parent must be a Plugger instance!')
+    if (!(parent instanceof Plugger || parent === null)) {
+      throw new TypeError(`${parent} is not a Plugger instance or null`);
     }
-    this[plug_parent] = parent;
+    this[pluginParent] = parent;
     return true;
   }
 
-  getPlugs() {return this[plugs];}
+  getPlugins() { return this[plugins]; }
 
-  addPlug(plug) {
-    if (isString(plug)) {
-      plug = require(plug);
-      if (!isPlug(plug)) {
-        throw new Error('Module must exports a Plugger instance!');
+  addPlugin(param) {
+    let plugin = param;
+    if (isString(param)) {
+      plugin = require(param);
+      if (!(plugin instanceof Plugger)) {
+        throw new TypeError(`${plugin} is not a Plugger instance`);
       }
-    }
-    else if (!isPlug(plug)) {
-      throw new TypeError('Must be a Plugger instance or a module path!');
+    } else if (!(param instanceof Plugger)) {
+      throw new TypeError(`${param} is not a Plugger instance or a string`);
     }
 
-    var name = plug.getName();
-    if (!Object.keys(this[plugs]).includes(name)) {
-      var required = plug.getRequiredPlugs();
-      for (var x in required) {
-        var required_name = required[x];
-        if (typeof this[plugs][required_name] === 'undefined') {
-          throw new Error(`Required Plug not found! -> ${required_name}`);    
+    const name = plugin.getName();
+    if (!Object.keys(this[plugins]).includes(name)) {
+      const required = plugin.getRequiredPlugins();
+      required.forEach((requiredPluginName) => {
+        if (typeof this[plugins][requiredPluginName] === 'undefined') {
+          throw new Error(`Required plugin is not loaded -> '${requiredPluginName}' (required by '${name}')`);
         }
-      }
-      this[plugs][name] = plug;
-      plug.setParent(this);
-      plug.initPlug();
+      });
+      this[plugins][name] = plugin;
+      plugin.setParent(this);
+      plugin.initPlugin();
       return true;
     }
-    else {
-      throw new Error('A Plug with the same name already exists!');
-    }
+    throw new Error(`A plugin with the same name (${name}) is already loaded`);
   }
 
-  removePlug(plug) {
-    if (isString(plug)) {
-      plug = require(plug);
-      if (!isPlug(plug)) {
-        throw new Error('Module must exports a Plugger instance!');
+  removePlugin(param) {
+    let plugin = param;
+    if (isString(param)) {
+      plugin = require(param);
+      if (!(plugin instanceof Plugger)) {
+        throw new TypeError(`${plugin} is not a Plugger instance`);
       }
-    }
-    else if (!isPlug(plug)) {
-      throw new TypeError('Must be a Plugger instance or a module path!');
+    } else if (!(param instanceof Plugger)) {
+      throw new TypeError(`${param} is not a Plugger instance or a string`);
     }
 
-    var name = plug.getName();
-    if (Object.keys(this[plugs]).includes(name)) {
-      delete this[plugs][name];
+    const name = plugin.getName();
+    if (Object.keys(this[plugins]).includes(name)) {
+      delete this[plugins][name];
+      plugin.setParent(null);
       return true;
     }
-    else {
-      throw new Error('Plug instance not found!');
-    }
+
+    throw new Error(`Plugin with the name '${name}' is not loaded`);
   }
 
-  getPlug(name) {
+  getPlugin(name) {
     if (!isString(name)) {
-      throw new TypeError('Plug name must be string!');
+      throw new TypeError(`${name} is not a string`);
     }
 
-    if (Object.keys(this[plugs]).includes(name)) {
-      return this[plugs][name];
+    if (Object.keys(this[plugins]).includes(name)) {
+      return this[plugins][name];
     }
-    else {
-      return null;
-    }
+
+    return null;
   }
 
-  getRequiredPlugs() {
-    return this[required_plugs];
+  getRequiredPlugins() {
+    return this[requredPlugins];
   }
 
-  removeRequiredPlug(name) {
+  removeRequiredPlugin(name) {
     if (!isString(name)) {
-      throw new TypeError('Plug name must be string!');
+      throw new TypeError(`${name} is not a string`);
     }
-    if (this[required_plugs].indexOf(name) > -1) {
-      this[required_plugs].splice(name, 1);
+    if (this[requredPlugins].indexOf(name) > -1) {
+      this[requredPlugins].splice(name, 1);
     }
     return true;
   }
 
-  requirePlug(name) {
+  requirePlugin(name) {
     if (!isString(name)) {
-      throw new TypeError('Plug name must be string!');
+      throw new TypeError(`${name} is not a string`);
     }
-    if (!this[required_plugs].indexOf(name) > -1) {
-      this[required_plugs].push(name);
+    if (!this[requredPlugins].indexOf(name) > -1) {
+      this[requredPlugins].push(name);
     }
     return true;
   }
 
   setInit(func) {
-    if (typeof func === "function") {
-      this[plug_init] = func;
+    if (typeof func === 'function') {
+      this[pluginInit] = func;
       return true;
     }
-    else {
-      throw new TypeError('Must be a function!');
-    }
+
+    throw new TypeError(`${func} is not a function`);
   }
 
-  initPlug() {
-    return this[plug_init]();
+  initPlugin() {
+    return this[pluginInit]();
   }
 }
+
+// For backward compatibility
+Plugger.prototype.getPlugs = Plugger.prototype.getPlugins;
+Plugger.prototype.addPlug = Plugger.prototype.addPlugin;
+Plugger.prototype.removePlug = Plugger.prototype.removePlugin;
+Plugger.prototype.getPlug = Plugger.prototype.getPlugin;
+Plugger.prototype.getRequiredPlugs = Plugger.prototype.getRequiredPlugins;
+Plugger.prototype.removeRequiredPlug = Plugger.prototype.removeRequiredPlugin;
+Plugger.prototype.requirePlug = Plugger.prototype.requirePlugin;
+Plugger.prototype.initPlug = Plugger.prototype.initPlugin;
 
 module.exports = Plugger;

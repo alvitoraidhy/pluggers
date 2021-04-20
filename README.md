@@ -2,7 +2,15 @@
 
 A simple plugin manager library.
 
-`pluggers` is designed to make modular projects easier to create.
+`pluggers` is designed to make modular projects easier to create. [recursive-install](https://www.npmjs.com/package/recursive-install) is recommended for independent plugins.
+
+## Features & Plans
+
+- [x] **Convenient** plugin loading and unloading
+- [x] **Unrestricted access** between plugins
+- [ ] **Asynchronous** plugin loading (configurable)
+- [ ] **Explicitly stated** load order
+- [ ] **JSON-based** plugin list & configurations
 
 ## Installation
 
@@ -14,133 +22,128 @@ npm install --save pluggers
 
 ## Usage
 
-*./master.js*
 ```javascript
+// ./plugin-1.js
 const Plugger = require('pluggers');
+
+const plugin = new Plugger('plugin-1');
+
+plugin.setInit(function() {
+  var current = plugin.getParent();
+  current.test = "Hello World!";
+});
+
+module.exports = plugin;
+```
+
+```javascript
+// ./plugin-2.js
+const Plugger = require('pluggers');
+
+// Error will be thrown if the plugin is using a used name ("plugin-1") when loaded
+const plugin = new Plugger('plugin-2');
+
+// Error will be thrown if a plugin named "plugin-1" is not loaded
+plugin.requirePlugin('plugin-1');
+
+plugin.setInit(function() {
+  var current = plugin.getParent();
+  console.log(current.test); // Prints "Hello World!"
+});
+
+module.exports = plugin;
+```
+
+```javascript
+// ./master.js
+const Plugger = require('./pluggers');
 
 // Create instance
 const master = new Plugger('master');
 
-// Add Plugs
-master.addPlug(__dirname + '/plugin-1');
-master.addPlug(__dirname + '/plugin-2');
+// Add plugins
+master.addPlugin(__dirname + '/plugin-1'); // Method 1
+master.addPlugin(require('./plugin-2')); // Method 2
 ```
 
-*./plugin-1.js*
-```javascript
-const Plugger = require('pluggers');
-
-const plug = new Plugger('plugin-1');
-
-plug.setInit(function() {
-  var current = plug.getParent();
-  current.test = "Hello World!";
-});
-
-module.exports = plug;
-```
-
-*./plugin-2.js*
-```javascript
-const Plugger = require('pluggers');
-
-// Error will be thrown if the plug is using an used name ("plugin-1").
-const plug = new Plugger('plugin-2');
-
-// Error will be thrown if a plug named "plugin-1" is not loaded.
-plug.requirePlug('plugin-1');
-
-plug.setInit(function() {
-  var current = plug.getParent();
-  console.log(current.test); // Prints "Hello World!"
-});
-
-module.exports = plug;
-```
+The above codes will print "Hello World!" if `master.js` is executed.
 
 ## API
 
+### `Plugger(plugin_name: string)`
 
-### `Plugger(plug_name)`
-
-`plug_name` is the name of the Plug (string).
-
-Don't forget to use `new`, since `Plugger` is a class.
+`plugin_name` is the name of the plugin. Don't forget to use `new`, since `Plugger` is a class.
 
 ```javascript
 const instance = new Plugger('master');
 ```
 
-###### Returns
+### Returns
 
 a Plugger instance.
 
-###### Throws
+### Throws
 
-If `plug_name` isn't a string (`TypeError`)
+If `plugin_name` isn't a string (`TypeError`)
 
+### `instance.addPlugin(plugin: Plugger | string)`
 
-### `instance.addPlug(plug)`
+`plugin` can either be:
 
-`plug` can either be: 
 - a path to module that is exporting a Plugger instance
 - a Plugger instance
 
-###### Returns
+#### Returns
 
 `true`
 
-###### Throws
+#### Throws
 
-- if `plug` isn't a string or a Plugger instance (`TypeError`)
+- if `plugin` isn't a string or a Plugger instance (`TypeError`)
 - if the module on path isn't exporting a Plugger instance (`Error`)
-- if a Plug with the same name already added (`Error`)
+- if a plugin with the same name is already loaded (`Error`)
 
+### `instance.removePlugin(plugin: Plugger | string)`
 
-### `instance.removePlug(plug)`
+The syntax is the same as `addPlugin`.
 
-The same as `addPlug`.
-
-###### Returns
+#### Returns
 
 `true`
 
-###### Throws
+#### Throws
 
-- if `plug` isn't a string or a Plugger instance (`TypeError`)
+- if `plugin` isn't a string or a Plugger instance (`TypeError`)
 - if the module on path isn't exporting a Plugger instance (`Error`)
-- if `plug` isn't loaded (`Error`)
+- if `plugin` isn't loaded (`Error`)
 
+### `instance.getPlugin(plugin_name: string)`
 
-### `instance.getPlug(plug_name)`
+`plugin_name` is the name of the plugin that you want to retrieve.
 
-`plug_name` is the name of the Plug that you want to get.
+#### Returns
 
-###### Returns
-
-- a Plug instance with the same name as `plug_name`, or
-- `null` if not found.
-
+- a Plugger instance with the same name as `plugin_name`, or
+- `null` if not found
 
 ### `instance.getParent()`
 
-###### Returns
+#### Returns
 
-the parent Plug instance.
+- the parent Plugger instance, or
+- `null` if has no parent/not loaded
 
+### `instance.setInit(func: function)`
 
-### `instance.setInit(func)`
+`func` is a function that will be executed when the plugin is getting loaded.
 
-`func` is a function that will be executed when Plug is added by other Plug.
-
-###### Returns
+#### Returns
 
 `true`
 
-###### Throws
+#### Throws
 
 If `func` isn't a function (`TypeError`)
-
 
 ## Other Methods
 
@@ -148,19 +151,18 @@ If `func` isn't a function (`TypeError`)
 
 ### `instance.setName(name)`
 
-### `instance.setParent(plug)`
+### `instance.setParent(plugin)`
 
-### `instance.getPlugs()`
+### `instance.getPlugins()`
 
-### `instance.getRequiredPlugs()`
+### `instance.getRequiredPlugins()`
 
-### `instance.initPlug()`
-
+### `instance.initPlugin()`
 
 ## Contributing
+
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
 
-*README created using [Make a README](https://www.makeareadme.com/)*
+[MIT](https://choosealicense.com/licenses/mit/)
