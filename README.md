@@ -102,10 +102,15 @@ If `plugin_name` isn't a string (`TypeError`)
 - if `plugin` isn't a string or a Plugger instance (`TypeError`)
 - if the module on path isn't exporting a Plugger instance (`TypeError`)
 - if a plugin with the same name is already loaded (`Plugger.errorTypes.ConflictError`)
+- if at least one required plugin is not loaded by the time of the execution (`Plugger.errorTypes.RequirementError`)
 
 ### `instance.removePlugin(plugin: Plugger | string)`
 
-The syntax is the same as `addPlugin`.
+`plugin` can either be:
+
+- a path to module that is exporting a Plugger instance
+- a Plugger instance's name
+- a Plugger instance
 
 #### Returns
 
@@ -114,8 +119,8 @@ The syntax is the same as `addPlugin`.
 #### Throws
 
 - if `plugin` isn't a string or a Plugger instance (`TypeError`)
-- if the module on path isn't exporting a Plugger instance (`Error`)
-- if `plugin` isn't loaded (`Error`)
+- if the module on path isn't exporting a Plugger instance (`TypeError`)
+- if `plugin` isn't loaded (`Plugger.errorTypes.NotLoadedError`)
 
 ### `instance.getPlugin(plugin_name: string)`
 
@@ -153,9 +158,9 @@ If `func` isn't a function (`TypeError`)
 
 ### `instance.getName()`
 
-### `instance.setName(name)`
+### `instance.setName(name: string)`
 
-### `instance.setParent(plugin)`
+### `instance.setParent(plugin: Plugger)`
 
 ### `instance.getPlugins()`
 
