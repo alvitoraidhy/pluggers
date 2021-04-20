@@ -100,8 +100,8 @@ If `plugin_name` isn't a string (`TypeError`)
 #### Throws
 
 - if `plugin` isn't a string or a Plugger instance (`TypeError`)
-- if the module on path isn't exporting a Plugger instance (`Error`)
-- if a plugin with the same name is already loaded (`Error`)
+- if the module on path isn't exporting a Plugger instance (`TypeError`)
+- if a plugin with the same name is already loaded (`Plugger.errorTypes.ConflictError`)
 
 ### `instance.removePlugin(plugin: Plugger | string)`
 
