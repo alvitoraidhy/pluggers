@@ -2,7 +2,7 @@
 
 A simple plugin manager library.
 
-`pluggers` is designed to make modular projects easier to create. [recursive-install](https://www.npmjs.com/package/recursive-install) is recommended for independent plugins.
+[pluggers](https://www.npmjs.com/package/pluggers) is designed to make modular projects easier to create. [recursive-install](https://www.npmjs.com/package/recursive-install) is recommended for independent plugins.
 
 ## Features & Plans
 
@@ -78,11 +78,11 @@ The above codes will print "Hello World!" if `master.js` is executed.
 const instance = new Plugger('master');
 ```
 
-### Returns
+#### Returns
 
 a Plugger instance.
 
-### Throws
+#### Throws
 
 If `plugin_name` isn't a string (`TypeError`)
 
@@ -125,6 +125,10 @@ The syntax is the same as `addPlugin`.
 
 - a Plugger instance with the same name as `plugin_name`, or
 - `null` if not found
+
+#### Throws
+
+If `plugin_name` isn't a string (`TypeError`)
 
 ### `instance.getParent()`
 
