@@ -1,0 +1,10 @@
+version: '2.1'
+orbs:
+  node: circleci/node@4.3.0
+
+workflows:
+  test-with-coverage:
+    jobs:
+      - node/test:
+          override-ci-command: 'npm install'
+          run-command: 'test-ci'
