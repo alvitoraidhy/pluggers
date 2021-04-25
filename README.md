@@ -1,4 +1,5 @@
 # Pluggers
+
 [![CircleCI](https://circleci.com/gh/alvitoraidhy/pluggers.svg?style=shield)](https://circleci.com/gh/alvitoraidhy/pluggers)
 [![codecov](https://codecov.io/gh/alvitoraidhy/pluggers/branch/master/graph/badge.svg?token=MZY3IEV0HS)](https://codecov.io/gh/alvitoraidhy/pluggers)
 
@@ -11,7 +12,7 @@ A simple plugin manager library.
 - [x] **Convenient** plugin loading and unloading
 - [x] **Unrestricted access** between plugins
 - [ ] **Asynchronous** plugin loading (configurable)
-- [ ] **Explicitly stated** load order
+- [ ] **Priority-based** load order (explicit or automatic)
 - [ ] **JSON-based** plugin list & configurations
 
 ## Installation
