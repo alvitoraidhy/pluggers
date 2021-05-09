@@ -535,7 +535,7 @@ describe('Loader functions test', () => {
       });
     });
 
-    describe('#initAll(autoSort: bool)', () => {
+    describe('#initAll(autoSort: boolean)', () => {
       it('should initialize all loaded plugins with already sorted load order (autoSort === false)', () => {
         const parent = new Plugger('parent');
 
