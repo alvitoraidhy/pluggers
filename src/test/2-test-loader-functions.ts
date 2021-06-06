@@ -40,7 +40,7 @@ describe('Loader functions test', () => {
         const child = new Plugger('child');
 
         let result = false;
-        child.setInit(() => { result = true; return result; });
+        child.pluginCallbacks.init = () => { result = true; return result; };
         parent.addPlugin(child);
 
         assert.strictEqual(result, true);
@@ -54,12 +54,11 @@ describe('Loader functions test', () => {
 
         const child = new Plugger('child');
 
-        let result = false;
-        child.setInit(() => { result = true; return result; });
         parent.addPlugin(child);
 
-        assert.strictEqual(result, false);
-        assert.strictEqual(parent.getState(child).isInitialized, false);
+        const state = parent.getState(child);
+        assert.strictEqual(state.isInitialized, false);
+        assert.strictEqual(state.state, null);
       });
 
       it('should throw an error (RequirementError) when a required plugin(s) is not loaded', () => {
@@ -290,8 +289,8 @@ describe('Loader functions test', () => {
       });
     });
 
-    describe('#getSortedLoadOrder()', () => {
-      it('should return the sorted load order with undefined priorities', () => {
+    describe('#sortLoadOrder()', () => {
+      it('should sort the load order with undefined priorities', () => {
         const parent = new Plugger('parent');
 
         // Disable autoInit for this test
@@ -311,7 +310,9 @@ describe('Loader functions test', () => {
           child3.getName(),
         ];
 
-        const loadOrder = parent.getSortedLoadOrder().reduce((acc: string[], e) => {
+        parent.sortLoadOrder();
+
+        const loadOrder = parent.getLoadOrder().reduce((acc: string[], e) => {
           acc.push(e.getName());
           return acc;
         }, []);
@@ -319,7 +320,7 @@ describe('Loader functions test', () => {
         assert.deepStrictEqual(loadOrder, expectedLoadOrder);
       });
 
-      it('should return the sorted load order with defined priorities', () => {
+      it('should sort the load order with defined priorities', () => {
         const parent = new Plugger('parent');
 
         // Disable autoInit for this test
@@ -349,7 +350,9 @@ describe('Loader functions test', () => {
           child2.getName(),
         ];
 
-        const loadOrder = parent.getSortedLoadOrder().reduce((acc: string[], e) => {
+        parent.sortLoadOrder();
+
+        const loadOrder = parent.getLoadOrder().reduce((acc: string[], e) => {
           acc.push(e.getName());
           return acc;
         }, []);
@@ -371,52 +374,7 @@ describe('Loader functions test', () => {
         parent.addPlugin(child1);
         parent.addPlugin(child2);
 
-        assert.throws(() => { parent.getSortedLoadOrder(); }, Plugger.errorTypes.RequirementError);
-      });
-    });
-
-    describe('#getSortedLoadOrder(loadOrder: Plugger[])', () => {
-      it('should return the sorted load order from external load order', () => {
-        const parent = new Plugger('parent');
-
-        // Disable autoInit for this test
-        parent.loaderConfig.autoInit = false;
-
-        // Expected load order: child1, child4, child2, child3
-        const child1 = new Plugger('child1');
-        const child2 = (new Plugger('child2')).requirePlugin('child4');
-        const child3 = (new Plugger('child3')).requirePlugin('child1');
-        const child4 = new Plugger('child4');
-
-        // Expected load order: child1, child3, child4, child2
-        child1.pluginConfig.defaultPriority = 5;
-        child2.pluginConfig.defaultPriority = 7;
-        child3.pluginConfig.defaultPriority = 3;
-
-        // Expected load order: child1, child3, child4, child2
-        parent.addPlugin(child2, { priority: -1 });
-        parent.addPlugin(child3);
-        parent.addPlugin(child1, { priority: 0 });
-        parent.addPlugin(child4);
-
-        // Expected load order: child4, child2, child1, child3
-        const extLoadOrder = [
-          child2, child3, child1, child4,
-        ];
-
-        const expectedLoadOrder = [
-          child4.getName(),
-          child2.getName(),
-          child1.getName(),
-          child3.getName(),
-        ];
-
-        const loadOrder = parent.getSortedLoadOrder(extLoadOrder).reduce((acc: string[], e) => {
-          acc.push(e.getName());
-          return acc;
-        }, []);
-
-        assert.deepStrictEqual(loadOrder, expectedLoadOrder);
+        assert.throws(() => { parent.sortLoadOrder(); }, Plugger.errorTypes.RequirementError);
       });
     });
 
@@ -428,7 +386,7 @@ describe('Loader functions test', () => {
         parent.loaderConfig.autoInit = false;
 
         const child = new Plugger('child');
-        child.setInit(() => 'initialized');
+        child.pluginCallbacks.init = () => 'initialized';
 
         parent.addPlugin(child);
 
@@ -456,7 +414,6 @@ describe('Loader functions test', () => {
 
         const child = new Plugger('child');
         child.requirePlugin('nonexistent');
-        child.setInit(() => 'initialized');
 
         parent.addPlugin(child);
 
@@ -473,27 +430,43 @@ describe('Loader functions test', () => {
 
         const child2 = new Plugger('child2');
         child2.requirePlugin('child1');
-        child2.setInit(() => 'initialized');
 
         parent.addPlugin(child1).addPlugin(child2);
 
         assert.throws(() => { parent.initPlugin(child2); }, Plugger.errorTypes.NotInitializedError);
       });
+
+      it('should run the callback function when an uncaught error occured when initializing', () => {
+        const parent = new Plugger('parent');
+
+        // Disable autoInit for this test
+        parent.loaderConfig.autoInit = false;
+
+        const child = new Plugger('child');
+
+        let testResult = false;
+        child.pluginCallbacks.init = () => { throw new Error(); };
+        child.pluginCallbacks.error = () => { testResult = true; };
+
+        parent.addPlugin(child);
+
+        assert.throws(() => { parent.initPlugin(child); });
+        assert.strictEqual(testResult, true);
+      });
     });
 
     describe('#initAll()', () => {
-      it('should initialize all loaded plugins with already sorted load order (loaderConfig.autoSort === false)', () => {
+      it('should initialize all loaded plugins with already sorted load order', () => {
         const parent = new Plugger('parent');
 
-        // Disable autoInit, autoSort for this test
+        // Disable autoInit for this test
         parent.loaderConfig.autoInit = false;
-        parent.loaderConfig.autoSort = false;
 
         const child1 = new Plugger('child1');
 
         const child2 = new Plugger('child2');
         child2.requirePlugin('child1');
-        child2.setInit(() => 'initialized');
+        child2.pluginCallbacks.init = () => 'initialized';
 
         parent.addPlugin(child1).addPlugin(child2);
 
@@ -507,24 +480,24 @@ describe('Loader functions test', () => {
         assert.strictEqual(child2State.state, 'initialized');
       });
 
-      it('should initialize all loaded plugins with unsorted load order (loaderConfig.autoSort === true)', () => {
+      it('should initialize all loaded plugins with unsorted load order', () => {
         const parent = new Plugger('parent');
 
         // Disable autoInit for this test
         parent.loaderConfig.autoInit = false;
 
         // Enable autoSort for this test
-        parent.loaderConfig.autoSort = true;
 
         const child1 = new Plugger('child1');
 
         const child2 = new Plugger('child2');
         child2.requirePlugin('child1');
-        child2.setInit(() => 'initialized');
+        child2.pluginCallbacks.init = () => 'initialized';
 
         parent.addPlugin(child2).addPlugin(child1);
 
-        assert.doesNotThrow(() => { parent.initAll(); });
+        parent.sortLoadOrder();
+        parent.initAll();
 
         const child1State = parent.getState(child1);
         const child2State = parent.getState(child2);
@@ -535,53 +508,106 @@ describe('Loader functions test', () => {
       });
     });
 
-    describe('#initAll(autoSort: boolean)', () => {
-      it('should initialize all loaded plugins with already sorted load order (autoSort === false)', () => {
+    describe('#shutdownPlugin(plugin: Plugger)', () => {
+      it('should shutdown the plugin', () => {
+        const parent = new Plugger('parent');
+
+        const child = new Plugger('child');
+        child.pluginCallbacks.init = () => 'initialized';
+
+        parent.addPlugin(child);
+
+        const childState = parent.getState(child);
+
+        assert.strictEqual(childState.isInitialized, true);
+        assert.strictEqual(childState.state, 'initialized');
+
+        let shutdownTest = false;
+
+        child.pluginCallbacks.shutdown = () => { shutdownTest = true; };
+
+        parent.shutdownPlugin(child);
+
+        assert.strictEqual(shutdownTest, true);
+        assert.strictEqual(childState.isInitialized, false);
+        assert.strictEqual(childState.state, null);
+      });
+
+      it('should throw an error when \'plugin\' is not loaded', () => {
+        const parent = new Plugger('parent');
+
+        const child = new Plugger('child');
+
+        assert.throws(() => { parent.initPlugin(child); }, Plugger.errorTypes.NotLoadedError);
+      });
+
+      it('should throw an error when \'plugin\' is not initialized', () => {
         const parent = new Plugger('parent');
 
         // Disable autoInit for this test
         parent.loaderConfig.autoInit = false;
 
+        const child = new Plugger('child');
+
+        parent.addPlugin(child);
+
+        assert.throws(() => {
+          parent.shutdownPlugin(child);
+        }, Plugger.errorTypes.NotInitializedError);
+      });
+
+      it('should run the callback function if an uncaught error occured when shutting down the plugin', () => {
+        const parent = new Plugger('parent');
+
+        const child = new Plugger('child');
+        child.pluginCallbacks.init = () => 'initialized';
+
+        parent.addPlugin(child);
+
+        const childState = parent.getState(child);
+
+        assert.strictEqual(childState.isInitialized, true);
+        assert.strictEqual(childState.state, 'initialized');
+
+        let testResult = false;
+        child.pluginCallbacks.shutdown = () => { throw new Error(); };
+        child.pluginCallbacks.error = () => { testResult = true; };
+
+        assert.throws(() => { parent.shutdownPlugin(child); });
+        assert.strictEqual(testResult, true);
+
+        // Reset the callback
+        child.pluginCallbacks.shutdown = () => {};
+      });
+    });
+
+    describe('#shutdownAll()', () => {
+      it('should shutdown all initialized plugins', () => {
+        const parent = new Plugger('parent');
+
         const child1 = new Plugger('child1');
 
         const child2 = new Plugger('child2');
         child2.requirePlugin('child1');
-        child2.setInit(() => 'initialized');
+        child2.pluginCallbacks.init = () => 'initialized';
 
         parent.addPlugin(child1).addPlugin(child2);
 
-        assert.doesNotThrow(() => { parent.initAll(false); });
-
         const child1State = parent.getState(child1);
         const child2State = parent.getState(child2);
 
         assert.strictEqual(child1State.isInitialized, true);
         assert.strictEqual(child2State.isInitialized, true);
         assert.strictEqual(child2State.state, 'initialized');
-      });
 
-      it('should initialize all loaded plugins with unsorted load order (autoSort === true)', () => {
-        const parent = new Plugger('parent');
+        parent.shutdownAll();
 
-        // Disable autoInit for this test
-        parent.loaderConfig.autoInit = false;
+        const states = parent.getStates();
 
-        const child1 = new Plugger('child1');
-
-        const child2 = new Plugger('child2');
-        child2.requirePlugin('child1');
-        child2.setInit(() => 'initialized');
-
-        parent.addPlugin(child2).addPlugin(child1);
-
-        assert.doesNotThrow(() => { parent.initAll(true); });
-
-        const child1State = parent.getState(child1);
-        const child2State = parent.getState(child2);
-
-        assert.strictEqual(child1State.isInitialized, true);
-        assert.strictEqual(child2State.isInitialized, true);
-        assert.strictEqual(child2State.state, 'initialized');
+        for (let i = 0, len = states.length; i < len; i += 1) {
+          assert.strictEqual(states[i].isInitialized, false);
+          assert.strictEqual(states[i].state, null);
+        }
       });
     });
   });

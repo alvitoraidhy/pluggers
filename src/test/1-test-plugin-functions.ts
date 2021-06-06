@@ -11,8 +11,31 @@ describe('Plugin functions test', () => {
       });
     });
 
+    describe('#getContext()', () => {
+      it('should be persistent during runtime', () => {
+        const plugin = new Plugger('plugin');
+        const ctx = plugin.getContext();
+
+        const someProperty = 'someValue';
+        ctx.someProperty = someProperty;
+        assert.strictEqual(ctx.someProperty, someProperty);
+
+        const ctx2 = plugin.getContext();
+        assert.strictEqual(ctx2, ctx);
+        assert.deepStrictEqual(ctx2, ctx);
+        assert.strictEqual(ctx2.someProperty, someProperty);
+      });
+
+      it('should be different between plugins', () => {
+        const plugin1 = new Plugger('plugin1');
+        const plugin2 = new Plugger('plugin2');
+
+        assert.notStrictEqual(plugin1.getContext(), plugin2.getContext());
+      });
+    });
+
     describe('#requirePlugin(name: string)', () => {
-      it('should add the plugin as a requirement requirement without a problem', () => {
+      it('should add the plugin as a requirement without a problem', () => {
         const parent = new Plugger('parent');
         assert.doesNotThrow(() => {
           parent.requirePlugin('required');
@@ -95,26 +118,6 @@ describe('Plugin functions test', () => {
         // Remove optional plugins from requirement
         optionalPlugins.forEach((optionalPlugin) => plugin.removeRequiredPlugin(optionalPlugin));
         assert.deepStrictEqual(plugin.getRequiredPlugins(), pluginRequirements);
-      });
-    });
-
-    describe('#setInit(func: function)', () => {
-      it('should set the plugin\'s init function', () => {
-        const plugin = new Plugger('plugin');
-        assert.doesNotThrow(() => {
-          plugin.setInit(() => {});
-        });
-      });
-    });
-
-    describe('#getInit()', () => {
-      it('should return the plugin\'s init function', () => {
-        const plugin = new Plugger('plugin');
-
-        const initFunc = () => {};
-        plugin.setInit(initFunc);
-
-        assert.strictEqual(plugin.getInit(), initFunc);
       });
     });
   });
