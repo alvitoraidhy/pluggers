@@ -16,7 +16,7 @@ class Plugin extends Base {
 
   pluginConfig = {
     metadata: {} as object,
-    defaultPriority: undefinedPriority as number,
+    defaultPriority: undefinedPriority as unknown as number,
   };
 
   pluginCallbacks = {
@@ -24,10 +24,10 @@ class Plugin extends Base {
     error: () => {},
     shutdown: () => {},
   } as {
-    init: (pluginsStates: { [key: string]: any }) => any,
+    init: (pluginsStates: { [index: string]: any }) => any,
     error: (event: string, error: Error) => void,
     shutdown: (state: any) => void,
-    [key: string]: (...arg: any) => any,
+    [index: string]: (...arg: any) => any,
   };
 
   constructor(name: string) {

@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-export const undefinedPriority: number = Infinity; // Must be JSON-safe
+export const undefinedPriority: number = Symbol.for('undefinedPriority') as unknown as number; // Must be JSON-safe
 export const pluginProps: unique symbol = Symbol.for('pluginProps');
 export const loaderProps: unique symbol = Symbol.for('loaderProps');
 export const errorTypes = {
