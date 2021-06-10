@@ -3,11 +3,11 @@
 [![CircleCI](https://circleci.com/gh/alvitoraidhy/pluggers.svg?style=shield)](https://circleci.com/gh/alvitoraidhy/pluggers)
 [![codecov](https://codecov.io/gh/alvitoraidhy/pluggers/branch/master/graph/badge.svg?token=MZY3IEV0HS)](https://codecov.io/gh/alvitoraidhy/pluggers)
 
-A convenient plugin manager library.
+*A convenient plugin manager library.*
 
 [pluggers](https://www.npmjs.com/package/pluggers) is designed to make modular projects easier to create. [recursive-install](https://www.npmjs.com/package/recursive-install) is recommended for making plugins truly independent.
 
-Warning: there are many breaking changes for those who are upgrading from pre-v1 to v1.
+**Warning**: there are many breaking changes for those who are upgrading from pre-v1 to v1.
 
 ## Features & Plans
 
@@ -27,9 +27,11 @@ npm install --save pluggers
 
 ## Usage
 
+`./plugin1.js`
+
 ```javascript
 // ./plugin1.js
-const Plugger = require('./pluggers').default;
+const Plugger = require('pluggers').default;
 
 const plugin = new Plugger('plugin1');
 
@@ -41,9 +43,11 @@ plugin.pluginCallbacks.init = () => {
 module.exports = plugin;
 ```
 
+`./plugin2.js`
+
 ```javascript
 // ./plugin2.js
-const Plugger = require('./pluggers').default;
+const Plugger = require('pluggers').default;
 
 // Error will be thrown if the plugin is using a used name ("plugin1") when loaded
 const plugin = new Plugger('plugin2');
@@ -59,9 +63,11 @@ plugin.pluginCallbacks.init = (plugins) => {
 module.exports = plugin;
 ```
 
+`./master.js`
+
 ```javascript
 // ./master.js
-const Plugger = require('./pluggers').default;
+const Plugger = require('pluggers').default;
 
 // Create instance
 const master = new Plugger('master');
@@ -85,9 +91,9 @@ Some common terms:
 
 ### Creating an instance
 
-#### `Plugger(plugin_name: string)`
+#### `Plugger(name: string)`
 
-`plugin_name` is the name of the plugin. Don't forget to use `new`, since `Plugger` is a class.
+`name` is the name of the instance. Don't forget to use `new`, since `Plugger` is a class.
 
 ```javascript
 const Plugger = require('./pluggers').default;
@@ -101,139 +107,324 @@ A new Plugger instance.
 
 ##### Throws
 
--
+\-
 
 ### As a plugin
 
-#### `instance.pluginConfig`
+#### `instance.pluginConfig.metadata`
 
-- `instance.pluginConfig.metadata`: the metadata of the object (`Object`, defaults to `{}`)
-- `instance.pluginConfig.defaultPriority`: the default priority of the instance (`number`, defaults to `undefinedPriority` private constant).
-This can be used when a plugin is designed to work always at a specific step of an app (ex: designed to be loaded first as a core plugin or loaded last as a bootstrapper).
+**Type**: `Object`\
+**Default**: `{}`\
+The metadata of `instance`.
 
-#### `instance.pluginCallbacks`
+#### `instance.pluginConfig.defaultPriority`
 
-- `instance.pluginCallbacks.init`: callback to be run when a plugin is initializing (`(pluginsStates: { [index: string]: any }) => any`, defaults to `() => {}`).
-The return value will be stored by the loader as the 'state' of the plugin. This state will be passed to any other plugins that has the plugin's name as a requirement. `init` callback function will be passed 1 argument, which is an `Object` that contains the state(s) of the instance's required plugin(s) and their names as their respective keys.
+**Type**: `number`\
+**Default**: `undefinedPriority` (private constant)\
+The default priority of `instance`. This property can be used when a plugin is designed to always be loaded at a specific step of an app (ex: designed to be loaded first as a core plugin or loaded last as the app runner).
 
-- `instance.pluginCallbacks.error`: callback to be run when a plugin encountered an uncaught error when running any of the other callbacks (`(event: string, error: Error) => void`, defaults to `() => {}`.
-`event` is the event type of the callback that throws the error. `error` is the error instance. `error` callbacks do not require a return value, since it won't be stored anyways.
+#### `instance.pluginCallbacks.init`
 
-- `instance.pluginCallbacks.shutdown`: callback to be run when a plugin is shutting down (`(state: any) => void`, defaults to `() => {}`).
-`state` is the state of the plugin that is shutting down.
+**Type**: `(pluginsStates: { [index: string]: any }) => any`\
+**Default**: `() => {}`\
+Callback to be run when `instance` is initializing. `init` callback function will be passed 1 argument, which is an `Object` that contains the state(s) of the instance's required plugin(s) with their names as their respective keys. The return value of the callback will be stored by the loader as the 'state' of the plugin. This state will be passed to any other plugins that has the plugin's name as a requirement.
+
+#### `instance.pluginCallbacks.error`
+
+**Type**: `(event: string, error: Error) => Error | null`\
+**Default**: `() => {}`\
+Callback to be run when `instance` encounters an uncaught error when running any of the other callbacks. `event` is the event type of the callback that throws the error. `error` is the error instance. `error` callbacks should either return an `Error` instance that will be thrown by the loader, or `null` to ignore the error entirely and let the whole program continue.
+
+#### `instance.pluginCallbacks.shutdown`
+
+**Type**: `(state: any) => void`\
+**Default**: `() => {}`\
+Callback to be run when `instance` is shutting down. `state` is the state of the plugin that is shutting down.
 
 #### `instance.getName()`
 
-Returns the name of the Plugger instance.
+Returns the name of `instance`.
 
 ##### Returns
 
-the name of `instance` (`string`)
+The name of `instance` (`string`)
 
 ##### Throws
 
--
+\-
 
 #### `instance.getContext()`
 
-Returns the context of the Plugger instance. This context is exclusive to the instance only and directly mutable. Note that the context is not the state of the instance. It is designed to be used internally by the instance.
+Returns the context of `instance`. This context is exclusive to the instance only and directly mutable. Note that the context is not the state of the instance. It is designed to be used internally by the instance.
 
 ##### Returns
 
-the context of `instance` (`Object`)
+The context of `instance` (`Object`)
 
 ##### Throws
 
--
+\-
 
-#### `instance.requirePlugin(pluginName: string)
+#### `instance.requirePlugin(pluginName: string, metadata?: object)`
 
-Adds `pluginName` as a requirement when a loader tries to load the instance. A loader will check if a plugin with the name `pluginName` is loaded and initialized first before trying to initialize the instance.
+Adds `pluginName`, with an optional `metadata` object, as a requirement when a loader tries to load `instance`. A loader will check if a plugin with the name `pluginName` (and with the metadata that 100% matches `metadata`, if provided) is loaded and initialized first before trying to initialize the instance.
 
 ##### Returns
 
-`this` instance
+`instance` (`Plugger`)
 
 ##### Throws
 
-- if `pluginName` is already a requirement of the instance (`Plugger.errorTypes.ConflictError`)
+If `pluginName` is already a requirement of the instance (`Plugger.errorTypes.ConflictError`)
 
-#### `instance.removeRequiredPlugin(pluginName:string)
+#### `instance.removeRequiredPlugin(pluginName:string)`
 
-Removes `pluginName` from the instance's list of required plugins.
+Removes `pluginName` from `instance`'s list of required plugins.
 
 ##### Returns
 
-`this` instance
+`instance` (`Plugger`)
 
 ##### Throws
 
-- If `pluginName` is not a requirement of the instance (`Plugger.errorTypes.RequirementError`)
+If `pluginName` is not a requirement for `instance` (`Plugger.errorTypes.RequirementError`)
 
 #### `instance.getRequiredPlugins()`
 
-Returns the instance's list of required plugins.
+Returns `instance`'s list of required plugins and their metadatas.
 
-#### Returns
+##### Returns
 
-An array of the instance's required plugins' names (`string[]`)
+An array of `instance`'s required plugins' names and metadatas (`{ name: string, ...metadata}[]`)
 
-#### Throws
+##### Throws
 
--
+\-
 
 ### As a loader
 
-#### `instance.loaderConfig`
+#### `instance.addPlugin(plugin: Plugger, { priority?: number })`
 
-- `instance.loaderConfig.autoInit`: configure whether or not a plugin will be initialized automatically when loaded (`boolean`, defaults to `true`).
-
-#### `instance.addPlugin(plugin: Plugger)`
-
-`plugin` is a Plugger that you want to load to your loader.
+Loads `plugin` to `instance`. `plugin` is a Plugger that you want to load. `priority` is the load order priority of `plugin`, which is optional. If `priority` is not provied, then the priority will default to `plugin.pluginConfig.defaultPriority`.
 
 ##### Returns
 
-`this` instance.
+`instance` (`Plugger`)
 
 ##### Throws
 
-- if a plugin with the same name is already loaded (`Plugger.errorTypes.ConflictError`)
-- if `instance.loaderConfig.autoInit` is `true` and if at least one required plugin is not loaded by the time of the execution (`Plugger.errorTypes.RequirementError`)
+If a plugin with the same name is already loaded (`Plugger.errorTypes.ConflictError`)
 
-#### `instance.removePlugin(plugin: Plugger | string)`
+#### `instance.removePlugin(plugin: Plugger)`
 
-`plugin` is a Plugger that you want to unload from your loader.
+`plugin` is a plugin that you want to unload from `instance`.
 
 ##### Returns
 
-`this` instance.
+`instance` (`Plugger`)
 
 ##### Throws
 
-- if `plugin` isn't loaded (`Plugger.errorTypes.NotLoadedError`)
-- if `plugin` is required by at least one loaded plugin by the time of the execution (`Plugger.errorTypes.RequirementError`)
+- If `plugin` isn't loaded (`Plugger.errorTypes.NotLoadedError`)
+- If `plugin` is required by at least one loaded plugin by the time of the execution (`Plugger.errorTypes.RequirementError`)
 
-#### `instance.getPlugin(plugin_name: string)`
+#### `instance.getPlugin(pluginName: string)`
 
-`plugin_name` is the name of the plugin that you want to retrieve.
+`pluginName` is the name of the loaded plugin that you want to retrieve.
 
 ##### Returns
 
-- a Plugger instance with the same name as `plugin_name`, or
+- A Plugger instance with the same name as `pluginName` (`Plugger`), or
 - `null` if not found
 
 ##### Throws
 
--
+\-
 
-#### `instance.setCallback(event: string, func: function)`
+#### `instance.getPlugins()`
 
-Set a callback that runs when an event occured.
+Gets all loaded plugins.
 
 ##### Returns
 
-`this` instance
+An array of Plugger instances (`Plugger[]`)
+
+##### Throws
+
+\-
+
+#### `instance.initPlugin(plugin: Plugger)`
+
+Initializes `plugin`.
+
+##### Returns
+
+`instance` (`Plugger`)
+
+##### Throws
+
+- If `plugin` is not loaded (`Plugger.errorTypes.NotLoadedError`)
+- If at least one of the required plugin(s) is not loaded (`Plugger.errorTypes.RequirementError`)
+- If at least one of the required plugin(s)'s metadata is different than the loaded plugin (`Plugger.errorTypes.RequirementError`)
+- If at least one of the required plugin(s) is not initialized (`Plugger.errorTypes.NotInitializedError`)
+
+#### `instance.initAll()`
+
+Initializes all loaded plugins.
+
+##### Returns
+
+`instance` (`Plugger`)
+
+##### Throws
+
+The same as `initPlugin()`
+
+#### `instance.shutdownPlugin(plugin: Plugger)`
+
+Shuts down `plugin` and resets its state.
+
+##### Return
+
+`instance` (`Plugger`)
+
+##### Throws
+
+- If `plugin` is not loaded (`Plugger.errorTypes.NotLoadedError`)
+- If `plugin` is not initialized (`Plugger.errorTypes.NotInitializedError`)
+- If at least one initialized plugin requires `plugin` (`Plugger.errorTypes.NotInitializedError`)
+
+#### `instance.shutdownAll()`
+
+Shuts down all initialized plugins and resets their states
+
+##### Returns
+
+`instance` (`Plugger`)
+
+##### Throws
+
+The same as `shutdownPlugin()`
+
+#### `instance.getState(plugin: Plugger)`
+
+Gets the state of `plugin`.
+
+##### Returns
+
+- `PluginState`, which is as the following:
+
+  ```javascript
+  {
+    instance: Plugger,
+    priority: number,
+    isInitialized: boolean,
+    state: any,
+    requires: PluginState[]
+  }
+  ```
+
+- `null` if `plugin` is not loaded
+
+##### Throws
+
+\-
+
+#### `instance.getStates()`
+
+Gets the states of all loaded plugins.
+
+##### Returns
+
+An array of loaded plugins' states (`PluginState[]`)
+
+##### Throws
+
+\-
+
+#### `instance.getLoadOrder()`
+
+Gets the load order stored in `instance`, in respect of the plugins' load order priorities.
+
+##### Returns
+
+An array of plugins (`Plugger[]`)
+
+##### Throws
+
+\-
+
+#### `instance.sortLoadOrder()`
+
+Sorts the load order stored in `instance`. Plugins that are required by other plugins are set to intialize first. Their priorities are also taken into consideration.
+
+##### Returns
+
+`instance` (`Plugger`)
+
+##### Throws
+
+If at least one of the loaded plugins' required plugin(s) is not loaded (`Plugger.errorTypes.RequirementError`)
+
+#### `instance.attachExitListener()`
+
+Adds an exit event listener to `process`. It is recommended to only run this method on your main loader instance, to not pollute the event with many listeners (NodeJS limited the number of listeners to 10 per event). Running this method multiple times on the same instance won't register multiple listeners.
+
+##### Returns
+
+`instance` (`Plugger`)
+
+##### Throws
+
+\-
+
+#### `instance.detachExitListener()`
+
+Removes an exit event listener to `process`. Running this method without running `attachExitListener()` first won't do anything.
+
+##### Returns
+
+`instance` (`Plugger`)
+
+##### Throws
+
+\-
+
+## How Priorities Work
+
+There are 3 types of priorities that can be used, in order of the load order:
+
+- **Positive priority**, which is from `0` to `Infinity`.\
+  Plugins with positive number priorities will be initialized with the order from the lowest number (`0`) to the highest number (`Infinity`).
+
+- **Undefined priority**\
+  Plugins with undefined priorities will be initialized after plugins with positive number priorities with the order of which plugin gets loaded with `addPlugin()` first.
+
+- **Negative priority**, which is from `-Infinity` to `-1`.\
+  Negative priorities work like how negative indexes work in Python (ex: a plugin with the priority of `-1` will be loaded last, `-2` will be initialized second last, etc). Plugins with negative priorities will be processed after plugins with positive number priorities and undefined priorities, with the order from the lowest number (`-Infinity`) to the highest number (`-1`), and will be initialized according to their respective priorities.
+
+All types of priorities are stackable, for example:
+
+```javascript
+...
+loader.addPlugin(plugin1, { priority: 1 }); // this will be initialized first
+loader.addPlugin(plugin2, { priority: 1 }); // this will be initialized after 'plugin1'. Note that its priority is the same as 'plugin1'
+
+loader.initAll();
+```
+
+Because of their nature, plugins with negative priorities will be processed differently:
+
+```javascript
+...
+loader.addPlugin(plugin1, { priority: 1 }); // this will be initialized first
+loader.addPlugin(plugin2, { priority: 1 });
+
+loader.addPlugin(plugin3, { priority: -2 }) // this will be initialized after 'plugin1', before 'plugin2'
+loader.addPlugin(plugin4, { priority: -1 }) // this will be initialized after 'plugin2'
+
+loader.initAll(); // Load order: 'plugin1', 'plugin3', 'plugin2', 'plugin4'
+```
 
 ## Contributing
 
