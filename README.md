@@ -75,6 +75,8 @@ const master = new Plugger('master');
 // Add plugins
 master.addPlugin(require('./plugin1'));
 master.addPlugin(require('./plugin2'));
+
+master.initAll();
 ```
 
 The above codes will print "Hello World!" if `master.js` is executed.
@@ -225,8 +227,8 @@ If a plugin with the same name is already loaded (`Plugger.errorTypes.ConflictEr
 
 ##### Throws
 
-- If `plugin` isn't loaded (`Plugger.errorTypes.NotLoadedError`)
-- If `plugin` is required by at least one loaded plugin by the time of the execution (`Plugger.errorTypes.RequirementError`)
+- If `plugin` isn't loaded (`Plugger.errorTypes.LoadError`)
+- If `plugin` is required by at least one initialized plugin by the time of the execution (`Plugger.errorTypes.RequirementError`)
 
 #### `instance.getPlugin(pluginName: string)`
 
@@ -263,10 +265,11 @@ Initializes `plugin`.
 
 ##### Throws
 
-- If `plugin` is not loaded (`Plugger.errorTypes.NotLoadedError`)
+- If `plugin` is not loaded (`Plugger.errorTypes.LoadError`)
+- If `plugin` is already initialized (`Plugger.errorTypes.InitializeError`)
 - If at least one of the required plugin(s) is not loaded (`Plugger.errorTypes.RequirementError`)
 - If at least one of the required plugin(s)'s metadata is different than the loaded plugin (`Plugger.errorTypes.RequirementError`)
-- If at least one of the required plugin(s) is not initialized (`Plugger.errorTypes.NotInitializedError`)
+- If at least one of the required plugin(s) is not initialized (`Plugger.errorTypes.RequirementError`)
 
 #### `instance.initAll()`
 
@@ -290,9 +293,9 @@ Shuts down `plugin` and resets its state.
 
 ##### Throws
 
-- If `plugin` is not loaded (`Plugger.errorTypes.NotLoadedError`)
-- If `plugin` is not initialized (`Plugger.errorTypes.NotInitializedError`)
-- If at least one initialized plugin requires `plugin` (`Plugger.errorTypes.NotInitializedError`)
+- If `plugin` is not loaded (`Plugger.errorTypes.LoadError`)
+- If `plugin` is not initialized (`Plugger.errorTypes.InitializeError`)
+- If at least one initialized plugin requires `plugin` (`Plugger.errorTypes.RequirementError`)
 
 #### `instance.shutdownAll()`
 
@@ -317,9 +320,9 @@ Gets the state of `plugin`.
   ```javascript
   {
     instance: Plugger,
-    priority: number,
     isInitialized: boolean,
     state: any,
+    priority: number,
     requires: PluginState[]
   }
   ```
@@ -368,7 +371,7 @@ If at least one of the loaded plugins' required plugin(s) is not loaded (`Plugge
 
 #### `instance.attachExitListener()`
 
-Adds an exit event listener to `process`. It is recommended to only run this method on your main loader instance, to not pollute the event with many listeners (NodeJS limited the number of listeners to 10 per event). Running this method multiple times on the same instance won't register multiple listeners.
+Adds an exit event listener to `process`. This will run a function that executes `instance.shutdownAll()` when the `exit` event signal is emmited by `process`. It is recommended to only run this method on your main loader instance, as to not pollute the event with many listeners (NodeJS limited the number of listeners to 10 per event by default). Running this method multiple times on the same instance won't register multiple listeners.
 
 ##### Returns
 
@@ -380,7 +383,7 @@ Adds an exit event listener to `process`. It is recommended to only run this met
 
 #### `instance.detachExitListener()`
 
-Removes an exit event listener to `process`. Running this method without running `attachExitListener()` first won't do anything.
+Removes an exit event listener from `process`. Running this method without running `attachExitListener()` first won't do anything.
 
 ##### Returns
 
