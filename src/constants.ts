@@ -46,7 +46,7 @@ export const errorTypes = {
     constructor(message: string) {
       super(message);
       this.name = 'IgnoreError';
-      Object.setPrototypeOf(this.message, IgnoreError.prototype);
+      Object.setPrototypeOf(this, IgnoreError.prototype);
     }
   },
 };
