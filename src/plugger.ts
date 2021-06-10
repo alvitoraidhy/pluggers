@@ -1,22 +1,38 @@
-/* eslint-disable max-classes-per-file */
 /* eslint-disable no-unused-vars */
 import {
-  undefinedPriority, loaderProps, errorTypes,
+  undefinedPriority, loaderProps, errorTypes, CallbacksInterface,
 } from './constants';
 
 import Plugin from './plugin';
 
 const wrappedFunction = (
-  event: string,
-  func: () => any,
-  errorHandler: (eventName:string, error: Error) => void,
+  instance: Plugin, event: string, func: (plugin: Plugin) => any, errorHandler: CallbacksInterface['error'],
 ): any => {
   try {
-    return func();
+    return func(instance);
   } catch (err) {
-    errorHandler(event, err);
-    throw err;
+    const result = errorHandler.call(instance, event, err);
+    throw result !== null ? result : errorTypes.IgnoreError;
   }
+};
+
+const compare = (oldData: any, newData: any) => {
+  // ref: https://medium.com/swlh/ways-to-compare-value-or-object-equality-in-javascript-71551c6f7cf6
+  const keys = Object.keys(oldData);
+  for (let i = 0, len = keys.length; i < len; i += 1) {
+    const k = keys[i];
+    if (typeof oldData[k] !== 'object') {
+      if (
+        typeof oldData[k] === 'function'
+        && typeof newData[k] === 'function'
+      ) {
+        return oldData[k].toString() === newData[k].toString();
+      } if (oldData[k] !== newData[k]) return false;
+    } else {
+      compare(oldData[k], newData[k]);
+    }
+  }
+  return true;
 };
 
 interface PluginState {
@@ -30,19 +46,9 @@ interface PluginState {
 class Plugger extends Plugin {
   [loaderProps] = {
     pluginList: [] as PluginState[],
+    useExitListener: false as boolean,
+    exitListener: null as (() => void) | null,
   };
-
-  loaderConfig = {
-    autoInit: true as boolean,
-  };
-
-  constructor(name: string) {
-    super(name);
-
-    const self = this;
-
-    process.on('exit', () => { self.shutdownAll(); });
-  }
 
   getPlugins(): { [key: string]: Plugin } {
     const plugins = this[loaderProps].pluginList.reduce(
@@ -63,14 +69,9 @@ class Plugger extends Plugin {
     return this[loaderProps].pluginList;
   }
 
-  getState(plugin: Plugin): PluginState {
+  getState(plugin: Plugin): PluginState | null {
     const state = this[loaderProps].pluginList.find((x) => x.instance === plugin);
-
-    if (!state) {
-      throw new errorTypes.NotLoadedError('Plugin is not loaded');
-    }
-
-    return state;
+    return state || null;
   }
 
   addPlugin(plugin: Plugin, { priority = undefinedPriority } = {}): Plugger {
@@ -79,7 +80,7 @@ class Plugger extends Plugin {
       throw new errorTypes.ConflictError(`A plugin with the same name ('${name}') is already loaded`);
     }
 
-    const newState = {
+    const newState: PluginState = {
       instance: plugin,
       priority: priority !== undefinedPriority ? priority : plugin.pluginConfig.defaultPriority,
       isInitialized: false,
@@ -88,12 +89,15 @@ class Plugger extends Plugin {
     };
 
     this[loaderProps].pluginList.push(newState);
-    if (this.loaderConfig.autoInit) this.initPlugin(plugin);
     return this;
   }
 
   removePlugin(plugin: Plugin): Plugger {
     const state = this.getState(plugin);
+
+    if (!state) {
+      throw new errorTypes.LoadError('Plugin is not loaded');
+    }
 
     const states = this.getStates();
     const requiredBy = states.filter((x) => x.requires.indexOf(state) > -1);
@@ -104,7 +108,7 @@ class Plugger extends Plugin {
           return acc;
         }, [],
       );
-      throw new errorTypes.RequirementError(`Plugin is required by ${requiredBy.length} loaded plugins: ${names}`);
+      throw new errorTypes.RequirementError(`Plugin is required by ${requiredBy.length} initialized plugins: ${names}`);
     }
 
     if (state.isInitialized) {
@@ -126,7 +130,7 @@ class Plugger extends Plugin {
     const priorities = states.filter((x) => x.priority !== undefinedPriority).reduce(
       (acc: { [key: number]: Plugin[] }, e: PluginState) => {
         const key = e.priority;
-        if (!(Object.keys(acc).indexOf(String(key)) > -1)) acc[key] = [];
+        if (!(Object.keys(acc).includes(String(key)))) acc[key] = [];
         acc[key].push(e.instance);
         return acc;
       }, {},
@@ -167,7 +171,7 @@ class Plugger extends Plugin {
     return arr;
   }
 
-  sortLoadOrder(): any {
+  sortLoadOrder(): Plugger {
     const arr = this.getLoadOrder();
 
     // Bubble sort-ish algorithm
@@ -177,7 +181,7 @@ class Plugger extends Plugin {
         sorted = true;
         const requiredPlugins = arr[i].getRequiredPlugins();
         for (let j = 0, reqLen = requiredPlugins.length; j < reqLen; j += 1) {
-          const plugin = this.getPlugin(requiredPlugins[j]);
+          const plugin = this.getPlugin(requiredPlugins[j].name);
           const index = plugin ? arr.indexOf(plugin) : -1;
           if (!(plugin && index > -1)) {
             throw new errorTypes.RequirementError(`Required plugin is not loaded -> '${requiredPlugins[j]}' (required by '${arr[i].getName()}')`);
@@ -194,7 +198,7 @@ class Plugger extends Plugin {
 
     const newLoadOrder: PluginState[] = [];
     for (let i = 0, len = arr.length; i < len; i += 1) {
-      newLoadOrder.push(this.getState(arr[i]));
+      newLoadOrder.push(this.getState(arr[i]) as PluginState);
     }
 
     this[loaderProps].pluginList = newLoadOrder;
@@ -202,26 +206,39 @@ class Plugger extends Plugin {
     return this;
   }
 
-  initPlugin(plugin: Plugin): any {
-    /*
-      We use getState and not getPlugin here because there's a chance that 'plugin'
-      has the same name with one of the plugins loaded, but not that exact plugin.
-    */
+  initPlugin(plugin: Plugin): Plugger {
     const state = this.getState(plugin);
+
+    if (!state) {
+      throw new errorTypes.LoadError('Plugin is not loaded');
+    }
+
+    if (state.isInitialized) {
+      throw new errorTypes.InitializeError('Plugin is already initialized');
+    }
 
     const pluginsStates: { [key: string]: PluginState['state'] } = {};
     const requiredList = plugin.getRequiredPlugins();
     const requiredStates: PluginState[] = [];
     for (let x = 0, len = requiredList.length; x < len; x += 1) {
-      const requiredPluginName = requiredList[x];
-      const requiredPlugin = this.getPlugin(requiredPluginName);
+      const { name, ...metadata } = requiredList[x];
+      const requiredPlugin = this.getPlugin(name);
       if (!requiredPlugin) {
-        throw new errorTypes.RequirementError(`Required plugin is not loaded -> '${requiredPluginName}' (required by '${plugin.getName()}')`);
+        throw new errorTypes.RequirementError(`Required plugin is not loaded -> '${name}' (required by '${plugin.getName()}')`);
       }
 
-      const requiredPluginState = this.getState(requiredPlugin);
+      const loadedMetadata = requiredPlugin.pluginConfig.metadata;
+      if (!compare(metadata, loadedMetadata)) {
+        throw new errorTypes.RequirementError(`
+          Required plugin's metadata does not match loaded plugin's metadata (required by '${plugin.getName()}')\n
+          Required plugin: ${metadata}\n
+          Loaded plugin: ${loadedMetadata}
+        `);
+      }
+
+      const requiredPluginState = this.getState(requiredPlugin) as PluginState;
       if (!requiredPluginState.isInitialized) {
-        throw new errorTypes.NotInitializedError(`Required plugin is not initialized -> '${requiredPluginName}' (required by '${plugin.getName()}')`);
+        throw new errorTypes.RequirementError(`Required plugin is not initialized -> '${name}' (required by '${plugin.getName()}')`);
       }
 
       pluginsStates[requiredPlugin.getName()] = requiredPluginState.state;
@@ -229,26 +246,42 @@ class Plugger extends Plugin {
     }
 
     const { init, error } = plugin.pluginCallbacks;
-    const result = wrappedFunction('init', () => init(pluginsStates), error);
-    state.state = result;
-    state.isInitialized = true;
-    state.requires = requiredStates;
+    try {
+      const result = wrappedFunction(this, 'init', (instance: Plugin) => init.call(instance, pluginsStates), error);
+      state.state = result;
+      state.isInitialized = true;
+      state.requires = requiredStates;
+    } catch (err) {
+      if (!(err instanceof errorTypes.IgnoreError)) {
+        throw err;
+      }
+    }
+
     return this;
   }
 
-  initAll(): any {
+  initAll(): Plugger {
     const loadOrder = this.getLoadOrder();
     for (let x = 0, len = loadOrder.length; x < len; x += 1) {
-      this.initPlugin(loadOrder[x]);
+      const plugin = loadOrder[x];
+      const state = this.getState(plugin) as PluginState;
+      if (!state.isInitialized) {
+        this.initPlugin(loadOrder[x]);
+      }
     }
+
     return this;
   }
 
-  shutdownPlugin(plugin: Plugin): any {
+  shutdownPlugin(plugin: Plugin): Plugger {
     const pluginState = this.getState(plugin);
 
+    if (!pluginState) {
+      throw new errorTypes.LoadError('Plugin is not loaded');
+    }
+
     if (!pluginState.isInitialized) {
-      throw new errorTypes.NotInitializedError('Plugin is not initialized');
+      throw new errorTypes.InitializeError('Plugin is not initialized');
     }
 
     const states = this.getStates();
@@ -268,22 +301,53 @@ class Plugger extends Plugin {
     }
 
     const { shutdown, error } = plugin.pluginCallbacks;
-    wrappedFunction('shutdown', () => shutdown(pluginState.state), error);
-    pluginState.instance.pluginCallbacks.shutdown(pluginState.state);
-    pluginState.state = null;
-    pluginState.isInitialized = false;
+    try {
+      wrappedFunction(this, 'shutdown', (instance: Plugin) => shutdown.call(instance, pluginState.state), error);
+      pluginState.state = null;
+      pluginState.isInitialized = false;
+    } catch (err) {
+      if (!(err instanceof errorTypes.IgnoreError)) {
+        throw err;
+      }
+    }
 
     return this;
   }
 
-  shutdownAll(): any {
+  shutdownAll(): Plugger {
     const loadOrder = this.getLoadOrder().reverse();
     for (let x = 0, len = loadOrder.length; x < len; x += 1) {
       const plugin = loadOrder[x];
-      if (this.getState(plugin).isInitialized) {
-        this.shutdownPlugin(loadOrder[x]);
+      const state = this.getState(plugin) as PluginState;
+      if (state.isInitialized) {
+        this.shutdownPlugin(plugin);
       }
     }
+
+    return this;
+  }
+
+  attachExitListener(): Plugger {
+    if (!this[loaderProps].useExitListener && this[loaderProps].exitListener === null) {
+      const self = this;
+      const exitListener = () => self.shutdownAll();
+      this[loaderProps].exitListener = exitListener;
+
+      process.on('exit', this[loaderProps].exitListener as () => void);
+      this[loaderProps].useExitListener = true;
+    }
+
+    return this;
+  }
+
+  detachExitListener(): Plugger {
+    if (this[loaderProps].useExitListener && this[loaderProps].exitListener !== null) {
+      process.off('exit', this[loaderProps].exitListener as () => void);
+
+      this[loaderProps].useExitListener = false;
+      this[loaderProps].exitListener = null;
+    }
+
     return this;
   }
 }
