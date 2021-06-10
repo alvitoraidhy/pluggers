@@ -10,7 +10,7 @@ import Base from './base';
 class Plugin extends Base {
   private [pluginProps] = {
     pluginName: '' as string,
-    context: {} as any,
+    context: {} as object,
     requiredPlugins: [] as {name: string, [key: string]: any}[],
   };
 
@@ -53,7 +53,7 @@ class Plugin extends Base {
     return this;
   }
 
-  requirePlugin(name: string, metadata: { [key: string]: string } = {}): Plugin {
+  requirePlugin(name: string, metadata: object = {}): Plugin {
     if (this[pluginProps].requiredPlugins.some((x) => x.name === name)) {
       throw new errorTypes.ConflictError(`Plugin with the name "${name}" is already required`);
     }
