@@ -101,7 +101,7 @@ describe('Loader functions test', () => {
 
         parent.addPlugin(child).initPlugin(child);
 
-        assert.strictEqual(parent.getState(child)?.isInitialized, true);
+        assert.strictEqual(parent.getState(child)!.isInitialized, true);
         assert.doesNotThrow(() => parent.removePlugin(child));
         assert.strictEqual(testResult, true);
       });
@@ -126,7 +126,7 @@ describe('Loader functions test', () => {
         parent.addPlugin(child).addPlugin(initializedChild);
         parent.initAll();
 
-        assert.strictEqual(parent.getState(initializedChild)?.isInitialized, true);
+        assert.strictEqual(parent.getState(initializedChild)!.isInitialized, true);
         assert.throws(() => { parent.removePlugin(child); }, Plugger.errorTypes.RequirementError);
       });
     });
@@ -756,7 +756,7 @@ describe('Loader functions test', () => {
         parent.addPlugin(child1).addPlugin(child2);
         parent.initPlugin(child1);
 
-        assert.strictEqual(parent.getState(child2)?.isInitialized, false);
+        assert.strictEqual(parent.getState(child2)!.isInitialized, false);
         assert.doesNotThrow(() => { parent.shutdownAll(); });
         assert.strictEqual(testResult, true);
       });
