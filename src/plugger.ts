@@ -12,7 +12,7 @@ const wrappedFunction = (
     return func(instance);
   } catch (err) {
     const result = errorHandler.call(instance, event, err);
-    throw result !== null ? result : errorTypes.IgnoreError;
+    throw result !== null ? result : new errorTypes.IgnoreError('Error ignored');
   }
 };
 
@@ -22,12 +22,7 @@ const compare = (oldData: any, newData: any) => {
   for (let i = 0, len = keys.length; i < len; i += 1) {
     const k = keys[i];
     if (typeof oldData[k] !== 'object') {
-      if (
-        typeof oldData[k] === 'function'
-        && typeof newData[k] === 'function'
-      ) {
-        return oldData[k].toString() === newData[k].toString();
-      } if (oldData[k] !== newData[k]) return false;
+      if (oldData[k] !== newData[k]) return false;
     } else {
       compare(oldData[k], newData[k]);
     }

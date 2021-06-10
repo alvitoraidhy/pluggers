@@ -34,11 +34,18 @@ describe('Plugin functions test', () => {
       });
     });
 
-    describe('#requirePlugin(name: string)', () => {
-      it('should add the plugin as a requirement without a problem', () => {
+    describe('#requirePlugin(name: string, metadata?: object)', () => {
+      it('should add the plugin as a requirement without metadata', () => {
         const parent = new Plugger('parent');
         assert.doesNotThrow(() => {
           parent.requirePlugin('required');
+        });
+      });
+
+      it('should add the plugin as a requirement with metadata', () => {
+        const parent = new Plugger('parent');
+        assert.doesNotThrow(() => {
+          parent.requirePlugin('required', { version: '1.0.0' });
         });
       });
 
@@ -92,7 +99,10 @@ describe('Plugin functions test', () => {
         ];
 
         pluginRequirements.forEach((requiredPlugin) => plugin.requirePlugin(requiredPlugin));
-        const requiredPlugins = plugin.getRequiredPlugins();
+        const requiredPlugins = plugin.getRequiredPlugins().reduce((acc: string[], e) => {
+          acc.push(e.name);
+          return acc;
+        }, []);
 
         assert.deepStrictEqual(requiredPlugins, pluginRequirements);
       });
@@ -112,12 +122,18 @@ describe('Plugin functions test', () => {
         const combinedArr = [...optionalPlugins, ...pluginRequirements];
 
         // Add both optional and required plugins
-        combinedArr.forEach((requiredPlugin) => plugin.requirePlugin(requiredPlugin));
-        assert.deepStrictEqual(plugin.getRequiredPlugins(), combinedArr);
+        combinedArr.forEach((requiredPlugin) => {
+          plugin.requirePlugin(requiredPlugin);
+          const requiredPlugins = plugin.getRequiredPlugins();
+          assert.strictEqual(requiredPlugins.some((x) => x.name === requiredPlugin), true);
+        });
 
         // Remove optional plugins from requirement
-        optionalPlugins.forEach((optionalPlugin) => plugin.removeRequiredPlugin(optionalPlugin));
-        assert.deepStrictEqual(plugin.getRequiredPlugins(), pluginRequirements);
+        optionalPlugins.forEach((optionalPlugin) => {
+          plugin.removeRequiredPlugin(optionalPlugin);
+          const requiredPlugins = plugin.getRequiredPlugins();
+          assert.strictEqual(requiredPlugins.some((x) => x.name === optionalPlugin), false);
+        });
       });
     });
   });
