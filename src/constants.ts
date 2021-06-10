@@ -1,7 +1,18 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable max-classes-per-file */
 export const undefinedPriority: number = Symbol.for('undefinedPriority') as unknown as number; // Must be JSON-safe
 export const pluginProps: unique symbol = Symbol.for('pluginProps');
 export const loaderProps: unique symbol = Symbol.for('loaderProps');
+export interface CallbacksInterface {
+  init: (pluginsStates: { [index: string]: any }) => any;
+  error: (event: string, error: Error) => Error | null;
+  shutdown: (state: any) => void;
+}
+export const defaultCallbacks: CallbacksInterface = {
+  init: () => {},
+  error: (event:string, error: Error) => error,
+  shutdown: () => {},
+};
 export const errorTypes = {
   RequirementError: class RequirementError extends Error {
     constructor(message: string) {
@@ -17,18 +28,25 @@ export const errorTypes = {
       Object.setPrototypeOf(this, ConflictError.prototype);
     }
   },
-  NotLoadedError: class NotLoadedError extends Error {
+  LoadError: class LoadError extends Error {
     constructor(message: string) {
       super(message);
-      this.name = 'NotLoadedError';
-      Object.setPrototypeOf(this, NotLoadedError.prototype);
+      this.name = 'LoadError';
+      Object.setPrototypeOf(this, LoadError.prototype);
     }
   },
-  NotInitializedError: class NotInitializedError extends Error {
+  InitializeError: class InitializeError extends Error {
     constructor(message: string) {
       super(message);
-      this.name = 'NotInitializedError';
-      Object.setPrototypeOf(this, NotInitializedError.prototype);
+      this.name = 'InitializeError';
+      Object.setPrototypeOf(this, InitializeError.prototype);
+    }
+  },
+  IgnoreError: class IgnoreError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = 'IgnoreError';
+      Object.setPrototypeOf(this.message, IgnoreError.prototype);
     }
   },
 };

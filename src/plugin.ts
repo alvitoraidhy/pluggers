@@ -2,7 +2,7 @@
 /* eslint-disable max-classes-per-file */
 
 import {
-  undefinedPriority, pluginProps, errorTypes,
+  undefinedPriority, pluginProps, errorTypes, CallbacksInterface, defaultCallbacks,
 } from './constants';
 
 import Base from './base';
@@ -11,7 +11,7 @@ class Plugin extends Base {
   private [pluginProps] = {
     pluginName: '' as string,
     context: {} as any,
-    requiredPlugins: [] as string[],
+    requiredPlugins: [] as {name: string, [key: string]: any}[],
   };
 
   pluginConfig = {
@@ -19,16 +19,11 @@ class Plugin extends Base {
     defaultPriority: undefinedPriority as unknown as number,
   };
 
-  pluginCallbacks = {
-    init: () => {},
-    error: () => {},
-    shutdown: () => {},
-  } as {
-    init: (pluginsStates: { [index: string]: any }) => any,
-    error: (event: string, error: Error) => void,
-    shutdown: (state: any) => void,
-    [index: string]: (...arg: any) => any,
-  };
+  pluginCallbacks: CallbacksInterface = {
+    init: defaultCallbacks.init,
+    error: defaultCallbacks.error,
+    shutdown: defaultCallbacks.shutdown,
+  }
 
   constructor(name: string) {
     super();
@@ -43,26 +38,27 @@ class Plugin extends Base {
     return this[pluginProps].context;
   }
 
-  getRequiredPlugins(): string[] {
+  getRequiredPlugins(): { name: string, [key: string]: string }[] {
     return this[pluginProps].requiredPlugins;
   }
 
   removeRequiredPlugin(name: string): Plugin {
-    const index = this[pluginProps].requiredPlugins.indexOf(name);
-    if (!(index > -1)) {
+    const requiredPlugin = this[pluginProps].requiredPlugins.find((x) => x.name === name);
+    if (requiredPlugin === undefined) {
       throw new errorTypes.RequirementError(`Plugin with the name "${name}" is not required`);
     }
 
+    const index = this[pluginProps].requiredPlugins.indexOf(requiredPlugin);
     this[pluginProps].requiredPlugins.splice(index, 1);
     return this;
   }
 
-  requirePlugin(name: string): Plugin {
-    if (this[pluginProps].requiredPlugins.indexOf(name) > -1) {
+  requirePlugin(name: string, metadata: { [key: string]: string } = {}): Plugin {
+    if (this[pluginProps].requiredPlugins.some((x) => x.name === name)) {
       throw new errorTypes.ConflictError(`Plugin with the name "${name}" is already required`);
     }
 
-    this[pluginProps].requiredPlugins.push(name);
+    this[pluginProps].requiredPlugins.push({ ...metadata, name });
     return this;
   }
 }
