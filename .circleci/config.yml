@@ -7,4 +7,4 @@ workflows:
     jobs:
       - node/test:
           override-ci-command: 'npm install'
-          run-command: 'test-ci'
+          run-command: 'test:ci'
