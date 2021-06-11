@@ -9,7 +9,7 @@
   "types": "build/index.d.ts",
   "scripts": {
     "build": "rimraf ./build && tsc",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "test": "ts-mocha \"./src/test/*.ts\" ",
     "test:coverage": "TS_NODE_COMPILER_OPTIONS='{\"target\":\"es6\"}' nyc --reporter=lcov npm test",
     "test:ci": "npm run test:coverage && codecov",
