@@ -9,6 +9,8 @@ import {
 
 import Plugin from './plugin';
 
+const exitEvents = ['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT'];
+
 const wrappedFunction = (
   instance: Plugin, event: string, func: (plugin: Plugin) => any, errorHandler: CallbacksInterface['error'],
 ): any => {
@@ -367,7 +369,9 @@ class Plugger extends Plugin {
       const exitListener = () => self.shutdownAll();
       this[loaderProps].exitListener = exitListener;
 
-      process.on('exit', this[loaderProps].exitListener as () => void);
+      exitEvents.forEach((event) => {
+        process.on(event, this[loaderProps].exitListener as () => void);
+      });
       this[loaderProps].useExitListener = true;
     }
 
@@ -376,7 +380,9 @@ class Plugger extends Plugin {
 
   detachExitListener(): Plugger {
     if (this[loaderProps].useExitListener && this[loaderProps].exitListener !== null) {
-      process.off('exit', this[loaderProps].exitListener as () => void);
+      exitEvents.forEach((event) => {
+        process.off(event, this[loaderProps].exitListener as () => void);
+      });
 
       this[loaderProps].useExitListener = false;
       this[loaderProps].exitListener = null;

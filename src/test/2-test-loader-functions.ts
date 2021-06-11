@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import assert from 'assert';
 import Plugger from '../index';
 import { loaderProps } from '../constants';
@@ -767,7 +768,14 @@ describe('Loader functions test', () => {
         const plugin = new Plugger('plugin');
         plugin.attachExitListener();
 
-        assert.strictEqual(process.listeners('exit').includes(plugin[loaderProps].exitListener!), true);
+        const exitEvents = ['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT'];
+
+        exitEvents.forEach((event) => {
+          assert.strictEqual(
+            // @ts-ignore
+            process.listeners(event).includes(plugin[loaderProps].exitListener!), true,
+          );
+        });
       });
 
       it('should do nothing if there is already a listener', () => {
@@ -776,7 +784,15 @@ describe('Loader functions test', () => {
         plugin.attachExitListener();
 
         assert.doesNotThrow(() => { plugin.attachExitListener(); });
-        assert.strictEqual(process.listeners('exit').filter((e) => e === plugin[loaderProps].exitListener!).length, 1);
+
+        const exitEvents = ['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT'];
+
+        exitEvents.forEach((event) => {
+          assert.strictEqual(
+            // @ts-ignore
+            process.listeners(event).filter((e) => e === plugin[loaderProps].exitListener!).length, 1,
+          );
+        });
       });
     });
 
@@ -785,10 +801,22 @@ describe('Loader functions test', () => {
         const plugin = new Plugger('plugin');
         plugin.attachExitListener();
 
-        assert.strictEqual(process.listeners('exit').includes(plugin[loaderProps].exitListener!), true);
+        const exitEvents = ['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT'];
+
+        exitEvents.forEach((event) => {
+          assert.strictEqual(
+            // @ts-ignore
+            process.listeners(event).includes(plugin[loaderProps].exitListener!), true,
+          );
+        });
 
         plugin.detachExitListener();
-        assert.strictEqual(process.listeners('exit').includes(plugin[loaderProps].exitListener!), false);
+        exitEvents.forEach((event) => {
+          assert.strictEqual(
+            // @ts-ignore
+            process.listeners(event).includes(plugin[loaderProps].exitListener!), false,
+          );
+        });
       });
 
       it('should do nothing if there is no listener', () => {
