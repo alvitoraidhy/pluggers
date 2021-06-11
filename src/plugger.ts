@@ -1,5 +1,8 @@
 /* eslint-disable no-unused-vars */
 import semver from 'semver';
+import callsites from 'callsites';
+import path from 'path';
+import loadJsonFile from 'load-json-file';
 import {
   undefinedPriority, loaderProps, errorTypes, CallbacksInterface,
 } from './constants';
@@ -56,6 +59,30 @@ class Plugger extends Plugin {
     useExitListener: false as boolean,
     exitListener: null as (() => void) | null,
   };
+
+  static fromJsonFile(jsonFile = 'package.json', props: string[] | null = null) {
+    const cs = callsites();
+    const dirPath = path.dirname(cs[1].getFileName()!);
+    const filePath = path.resolve(dirPath, jsonFile);
+
+    const { name, pluginConfig, ...data }: {
+      name: string,
+      defaultPriority: number,
+      [key: string]: any,
+    } = loadJsonFile.sync(filePath);
+
+    const metadata = props !== null ? props.reduce((
+      acc: { [key: string]: string }, e: string,
+    ) => {
+      acc[e] = data[e];
+      return acc;
+    }, {}) : data;
+
+    const instance = new Plugger(name);
+    instance.pluginConfig.metadata = metadata;
+
+    return instance;
+  }
 
   getPlugins(): { [key: string]: Plugin } {
     const plugins = this[loaderProps].pluginList.reduce(

@@ -111,6 +111,40 @@ A new Plugger instance.
 
 \-
 
+#### `Plugger.fromJsonFile(fileName?: string, props?: string[])`
+
+Creates a Plugger instance from a JSON file. `filename` is the file name of the JSON relative to the file's directory that runs the method, defaults to `'package.json'`. `props` is an optional argument that specifies which properties to be included as the metadata of the instance. JSON must include `'name'` for the instance's name, everything else will be stored to `instance.pluginConfig.metadata`.
+
+`./package.json`
+
+```javascript
+{
+  "name": "myPlugin",
+  "version": "1.0.0"
+}
+```
+
+`./index.js`
+
+```javascript
+...
+const plugin = Plugger.fromJsonFile();
+
+// 'myPlugin'
+console.log(plugin.getName());
+
+// '{"version":"1.0.0"}'
+console.log(String(plugin.pluginConfig.metadata));
+```
+
+##### Returns
+
+A new Plugger instance.
+
+##### Throws
+
+If `fileName` does not exist (`Error`)
+
 ### As a plugin
 
 #### `instance.pluginConfig.metadata`
