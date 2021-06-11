@@ -399,8 +399,16 @@ describe('Loader functions test', () => {
       it('should initialize the plugin with a required plugin and its metadata', () => {
         const parent = new Plugger('parent');
 
-        const metadata = {
-          version: '1.0.0',
+        const requiredMetadata = {
+          version: '^1.0.0',
+          contributors: {
+            functions: 'john doe',
+            designs: 'jane doe',
+          },
+        };
+
+        const loadedMetadata = {
+          version: '1.5.0',
           contributors: {
             functions: 'john doe',
             designs: 'jane doe',
@@ -408,10 +416,10 @@ describe('Loader functions test', () => {
         };
 
         const child = new Plugger('child');
-        child.pluginConfig.metadata = metadata;
+        child.pluginConfig.metadata = loadedMetadata;
 
         const child2 = new Plugger('child2');
-        child2.requirePlugin(child.getName(), metadata);
+        child2.requirePlugin(child.getName(), requiredMetadata);
         child2.pluginCallbacks.init = () => 'initialized';
 
         parent.addPlugin(child).addPlugin(child2);
@@ -650,9 +658,6 @@ describe('Loader functions test', () => {
         child.pluginCallbacks.shutdown = () => { throw new Error(); };
 
         assert.throws(() => { parent.shutdownPlugin(child); });
-
-        // Reset the callback
-        child.pluginCallbacks.shutdown = () => {};
       });
 
       it('should run the callback function if an uncaught error occured when shutting down the plugin', () => {
@@ -679,9 +684,6 @@ describe('Loader functions test', () => {
 
         assert.throws(() => { parent.shutdownPlugin(child); });
         assert.strictEqual(testResult, true);
-
-        // Reset the callback
-        child.pluginCallbacks.shutdown = () => {};
       });
 
       it('should be able to ignore if an uncaught error occured when shutting down the plugin', () => {
@@ -708,9 +710,6 @@ describe('Loader functions test', () => {
 
         assert.doesNotThrow(() => { parent.shutdownPlugin(child); });
         assert.strictEqual(testResult, true);
-
-        // Reset the callback
-        child.pluginCallbacks.shutdown = () => {};
       });
     });
 
@@ -751,6 +750,7 @@ describe('Loader functions test', () => {
         const child2 = new Plugger('child2');
 
         let testResult = true;
+        /* istanbul ignore next */
         child2.pluginCallbacks.shutdown = () => { testResult = false; };
 
         parent.addPlugin(child1).addPlugin(child2);

@@ -169,7 +169,7 @@ The context of `instance` (`Object`)
 
 #### `instance.requirePlugin(pluginName: string, metadata?: object)`
 
-Adds `pluginName`, with an optional `metadata` object, as a requirement when a loader tries to load `instance`. A loader will check if a plugin with the name `pluginName` (and with the metadata that 100% matches `metadata`, if provided) is loaded and initialized first before trying to initialize the instance.
+Adds `pluginName`, with an optional `metadata` object, as a requirement when a loader tries to load `instance`. A loader will check if a plugin with the name `pluginName` (and with the metadata that 100% matches `metadata`, if provided) is loaded and initialized first before trying to initialize the instance. The property `'version'` of `metadata` and its nested objects supports [semantic versioning syntax](https://docs.npmjs.com/about-semantic-versioning).
 
 ##### Returns
 
@@ -371,7 +371,7 @@ If at least one of the loaded plugins' required plugin(s) is not loaded (`Plugge
 
 #### `instance.attachExitListener()`
 
-Adds an exit event listener to `process`. This will run a function that executes `instance.shutdownAll()` when the `exit` event signal is emmited by `process`. It is recommended to only run this method on your main loader instance, as to not pollute the event with many listeners (NodeJS limited the number of listeners to 10 per event by default). Running this method multiple times on the same instance won't register multiple listeners.
+Adds an exit event listener to `process`. This will run a function that executes `instance.shutdownAll()` when the `exit` event signal is emitted by `process`. It is recommended to only run this method on your main loader instance, as to not pollute the event with many listeners (NodeJS limited the number of listeners to 10 per event by default). Running this method multiple times on the same instance won't register multiple listeners.
 
 ##### Returns
 

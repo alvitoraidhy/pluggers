@@ -28,6 +28,7 @@
   "devDependencies": {
     "@types/mocha": "^8.2.2",
     "@types/node": "^15.0.1",
+    "@types/semver": "^7.3.6",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "codecov": "^3.8.1",
@@ -41,5 +42,8 @@
     "rimraf": "^3.0.2",
     "ts-mocha": "^8.0.0",
     "typescript": "^4.3.2"
+  },
+  "dependencies": {
+    "semver": "^7.3.5"
   }
 }

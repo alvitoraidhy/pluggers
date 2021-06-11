@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import semver from 'semver';
 import {
   undefinedPriority, loaderProps, errorTypes, CallbacksInterface,
 } from './constants';
@@ -16,18 +17,29 @@ const wrappedFunction = (
   }
 };
 
-const compare = (oldData: any, newData: any) => {
+const compareMetadata = (requiredMetadata: any, loadedMetadata: any): boolean => {
   // ref: https://medium.com/swlh/ways-to-compare-value-or-object-equality-in-javascript-71551c6f7cf6
-  const keys = Object.keys(oldData);
+  let result = true;
+  const keys = Object.keys(requiredMetadata);
   for (let i = 0, len = keys.length; i < len; i += 1) {
     const k = keys[i];
-    if (typeof oldData[k] !== 'object') {
-      if (oldData[k] !== newData[k]) return false;
-    } else {
-      compare(oldData[k], newData[k]);
+    switch (k) {
+      case 'version':
+        // semver.satisfies(loadedVersion, requiredVersion)
+        result = semver.satisfies(loadedMetadata[k], requiredMetadata[k]);
+        break;
+      default:
+        if (typeof requiredMetadata[k] !== 'object') {
+          result = requiredMetadata[k] === loadedMetadata[k];
+        } else {
+          result = compareMetadata(requiredMetadata[k], loadedMetadata[k]);
+        }
+        break;
     }
+
+    if (result === false) break;
   }
-  return true;
+  return result;
 };
 
 interface PluginState {
@@ -223,11 +235,11 @@ class Plugger extends Plugin {
       }
 
       const loadedMetadata = requiredPlugin.pluginConfig.metadata;
-      if (!compare(metadata, loadedMetadata)) {
+      if (!compareMetadata(metadata, loadedMetadata)) {
         throw new errorTypes.RequirementError(`
           Required plugin's metadata does not match loaded plugin's metadata (required by '${plugin.getName()}')\n
-          Required plugin: ${metadata}\n
-          Loaded plugin: ${loadedMetadata}
+          Required plugin: ${JSON.stringify(metadata)}\n
+          Loaded plugin: ${JSON.stringify(loadedMetadata)}
         `);
       }
 
