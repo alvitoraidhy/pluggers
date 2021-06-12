@@ -4,9 +4,9 @@ export const undefinedPriority: number = Symbol.for('undefinedPriority') as unkn
 export const pluginProps: unique symbol = Symbol.for('pluginProps');
 export const loaderProps: unique symbol = Symbol.for('loaderProps');
 export interface CallbacksInterface {
-  init: (pluginsStates: { [index: string]: any }) => any;
+  init: (pluginsStates: { [index: string]: any }, config: {[key: string]: string} | null) => any;
   error: (event: string, error: Error) => Error | null;
-  shutdown: (state: any) => void;
+  shutdown: (state: any, config: {[key: string]: string} | null) => void;
 }
 export const defaultCallbacks: CallbacksInterface = {
   init: () => {},

@@ -13,10 +13,10 @@
 ## Features & Plans
 
 - [x] **Convenient** plugin loading and unloading
-- [x] **Unrestricted access** between plugins
+- [x] **Flexible access** between plugins
 - [x] **Priority-based** load order (explicit or automatic)
+- [x] **Centralized configuration** system
 - [ ] **Asynchronous** plugin loading (configurable)
-- [ ] **JSON-based** load order & configurations
 
 ## Installation
 
@@ -162,9 +162,9 @@ The default priority of `instance`. This property can be used when a plugin is d
 
 #### `instance.pluginCallbacks.init`
 
-**Type**: `(pluginsStates: { [index: string]: any }) => any`\
+**Type**: `(pluginsStates: { [index: string]: any }, config: object | null) => any`\
 **Default**: `() => {}`\
-Callback to be run when `instance` is initializing. `init` callback function will be passed 1 argument, which is an `Object` that contains the state(s) of the instance's required plugin(s) with their names as their respective keys. The return value of the callback will be stored by the loader as the 'state' of the plugin. This state will be passed to any other plugins that has the plugin's name as a requirement.
+Callback to be run when `instance` is initializing. `pluginsStates` is an `Object` that contains the state(s) of the instance's required plugin(s) with their names as their respective keys. `config` is either an `Object` which contains the configurations imported from `'*.env'` file if `setupConfig()` was run by the loader, or `null` if otherwise. `config` is mutable and all changes will be saved to the `'*.env'` file that was passed to `setupConfig()`. The return value of the callback will be stored by the loader as the 'state' of the plugin. This state will be passed to any other plugins that has the plugin's name as a requirement.
 
 #### `instance.pluginCallbacks.error`
 
@@ -174,9 +174,9 @@ Callback to be run when `instance` encounters an uncaught error when running any
 
 #### `instance.pluginCallbacks.shutdown`
 
-**Type**: `(state: any) => void`\
+**Type**: `(state: any, config: object | null) => any) => void`\
 **Default**: `() => {}`\
-Callback to be run when `instance` is shutting down. `state` is the state of the plugin that is shutting down.
+Callback to be run when `instance` is shutting down. `state` is the state of the plugin that is shutting down. `config` is an `Object` that is mutable and periodically saved to a configuration file if `setupConfig()` was run by the loader, or `null` if otherwise.
 
 #### `instance.getName()`
 
@@ -432,6 +432,18 @@ Adds an exit event listener to `process`. This will run a function that executes
 #### `instance.detachExitListener()`
 
 Removes an exit event listener from `process`. Running this method without running `attachExitListener()` first won't do anything.
+
+##### Returns
+
+`instance` (`Plugger`)
+
+##### Throws
+
+\-
+
+#### `instance.setupConfig(envPath?: string)`
+
+Sets up the configuration system. `envPath` is the path to the `'*.env'` file relative to the file that runs the method, defaults to `'./.env'`. All configuration changes that occured by the plugins will be saved to the `'*.env'` file. If `envPath` does not exist, it will be silently created. It is recommended to use the method on the main loader instance to keep all configurations in one place.
 
 ##### Returns
 

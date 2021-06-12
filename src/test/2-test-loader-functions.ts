@@ -1,8 +1,10 @@
 /* eslint-disable max-len */
 import assert from 'assert';
 import path from 'path';
+import dotenv from 'dotenv';
 import Plugger from '../index';
 import { loaderProps } from '../constants';
+import loaderTest from './test-files/storeConfig-test';
 
 describe('Loader functions test', () => {
   describe('Plugger(name: string)', () => {
@@ -52,7 +54,7 @@ describe('Loader functions test', () => {
     describe('#addFolder(dirName: string)', () => {
       it('should load all plugins in a directory', () => {
         const parent = new Plugger('parent');
-        parent.addFolder('test-files/plugins');
+        parent.addFolder('test-files/addFolder-test');
 
         assert.notStrictEqual(parent.getPlugin('test1'), null);
         assert.notStrictEqual(parent.getPlugin('test2'), null);
@@ -61,7 +63,7 @@ describe('Loader functions test', () => {
 
       it('should support relative paths and load all plugins in a directory', () => {
         const parent = new Plugger('parent');
-        parent.addFolder('./test-files/plugins');
+        parent.addFolder('./test-files/addFolder-test');
 
         assert.notStrictEqual(parent.getPlugin('test1'), null);
         assert.notStrictEqual(parent.getPlugin('test2'), null);
@@ -70,7 +72,7 @@ describe('Loader functions test', () => {
 
       it('should support absolute paths and load all plugins in a directory', () => {
         const parent = new Plugger('parent');
-        parent.addFolder(path.resolve(__dirname, './test-files/plugins'));
+        parent.addFolder(path.resolve(__dirname, './test-files/addFolder-test'));
 
         assert.notStrictEqual(parent.getPlugin('test1'), null);
         assert.notStrictEqual(parent.getPlugin('test2'), null);
@@ -857,6 +859,39 @@ describe('Loader functions test', () => {
       it('should do nothing if there is no listener', () => {
         const plugin = new Plugger('plugin');
         assert.doesNotThrow(() => { plugin.detachExitListener(); });
+      });
+    });
+
+    describe('#setupConfig(envPath: string)', () => {
+      it('should load the relative \'.env\' by default', () => {
+        loaderTest.initAll();
+        const result: any = dotenv.config({ path: path.resolve(__dirname, 'test-files/storeConfig-test/.env') }).parsed;
+        assert.strictEqual(result.TEST, 'successful');
+        assert.strictEqual(result.ANOTHER_TRY, 'still successful');
+        assert.strictEqual(result.ONE_MORE, 'success');
+
+        loaderTest.shutdownAll();
+        const result2: any = dotenv.config({ path: path.resolve(__dirname, 'test-files/storeConfig-test/.env') }).parsed;
+        assert.strictEqual(result2.TEST, 'another success');
+        assert.strictEqual(Object.prototype.hasOwnProperty.call(result2, 'ANOTHER_TRY'), false);
+        assert.strictEqual(result2.ONE_MORE, 'success');
+      });
+
+      it('should load an \'*.env\'. file with a provided path', () => {
+        /* eslint-disable no-param-reassign */
+        const plugin = new Plugger('plugin');
+
+        plugin.pluginCallbacks.init = (states, config) => {
+          config = config || {};
+          assert.strictEqual(config.TEST_RESULT, 'success');
+        };
+
+        const loader = new Plugger('loader');
+
+        loader.setupConfig('test-files/storeConfig-test/custom.env');
+        loader.addPlugin(plugin);
+
+        loader.initAll();
       });
     });
   });

@@ -11,6 +11,8 @@ import {
 
 import Plugin from './plugin';
 
+import ConfigStore from './config';
+
 const exitEvents = ['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT'];
 
 const wrappedFunction = (
@@ -60,6 +62,7 @@ interface PluginState {
 class Plugger extends Plugin {
   [loaderProps] = {
     pluginList: [] as PluginState[],
+    config: null as ConfigStore | null,
     useExitListener: false as boolean,
     exitListener: null as (() => void) | null,
   };
@@ -164,9 +167,9 @@ class Plugger extends Plugin {
 
     fs.accessSync(path.join(fullPath, '/'));
 
-    glob.sync(path.join(fullPath, '*/index.!(d.ts)'), { strict: true }).forEach((pluginPath: string) => {
+    glob.sync(path.join(fullPath, '*/index.@(ts|js)'), { strict: true }).forEach((pluginPath: string) => {
       // eslint-disable-next-line global-require, import/no-dynamic-require
-      const plugin = require(pluginPath);
+      const plugin = require(path.dirname(pluginPath));
 
       if (plugin instanceof Plugin) this.addPlugin(plugin);
       else if (plugin.default instanceof Plugin) this.addPlugin(plugin.default);
@@ -303,7 +306,10 @@ class Plugger extends Plugin {
 
     const { init, error } = plugin.pluginCallbacks;
     try {
-      const result = wrappedFunction(this, 'init', (instance: Plugin) => init.call(instance, pluginsStates), error);
+      const configInstance = this[loaderProps].config;
+      const config = configInstance ? configInstance.refreshConfig().getConfig() : configInstance;
+      const result = wrappedFunction(this, 'init', (instance: Plugin) => init.call(instance, pluginsStates, config), error);
+      configInstance?.storeConfig();
       state.state = result;
       state.isInitialized = true;
       state.requires = requiredStates;
@@ -358,7 +364,10 @@ class Plugger extends Plugin {
 
     const { shutdown, error } = plugin.pluginCallbacks;
     try {
-      wrappedFunction(this, 'shutdown', (instance: Plugin) => shutdown.call(instance, pluginState.state), error);
+      const configInstance = this[loaderProps].config;
+      const config = configInstance ? configInstance.refreshConfig().getConfig() : configInstance;
+      wrappedFunction(this, 'shutdown', (instance: Plugin) => shutdown.call(instance, pluginState.state, config), error);
+      configInstance?.storeConfig();
       pluginState.state = null;
       pluginState.isInitialized = false;
     } catch (err) {
@@ -407,6 +416,16 @@ class Plugger extends Plugin {
       this[loaderProps].useExitListener = false;
       this[loaderProps].exitListener = null;
     }
+
+    return this;
+  }
+
+  setupConfig(envPath: string = './.env') {
+    const cs = callsites();
+    const dirPath = path.dirname(cs[1].getFileName()!);
+    const filePath = path.resolve(dirPath, envPath);
+
+    this[loaderProps].config = new ConfigStore(filePath);
 
     return this;
   }
