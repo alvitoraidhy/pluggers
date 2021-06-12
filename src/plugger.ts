@@ -1,8 +1,10 @@
 /* eslint-disable no-unused-vars */
+import fs from 'fs';
+import path from 'path';
+import glob from 'glob';
 import semver from 'semver';
 import callsites from 'callsites';
-import path from 'path';
-import loadJsonFile from 'load-json-file';
+import jsonfile from 'jsonfile';
 import {
   undefinedPriority, loaderProps, errorTypes, CallbacksInterface,
 } from './constants';
@@ -71,7 +73,7 @@ class Plugger extends Plugin {
       name: string,
       defaultPriority: number,
       [key: string]: any,
-    } = loadJsonFile.sync(filePath);
+    } = jsonfile.readFileSync(filePath);
 
     const metadata = props !== null ? props.reduce((
       acc: { [key: string]: string }, e: string,
@@ -152,6 +154,24 @@ class Plugger extends Plugin {
     }
 
     this[loaderProps].pluginList.splice(this[loaderProps].pluginList.indexOf(state), 1);
+    return this;
+  }
+
+  addFolder(dir: string): Plugger {
+    const cs = callsites();
+    const dirPath = path.dirname(cs[1].getFileName()!);
+    const fullPath = path.resolve(dirPath, dir);
+
+    fs.accessSync(path.join(fullPath, '/'));
+
+    glob.sync(path.join(fullPath, '*/index.!(d.ts)'), { strict: true }).forEach((pluginPath: string) => {
+      // eslint-disable-next-line global-require, import/no-dynamic-require
+      const plugin = require(pluginPath);
+
+      if (plugin instanceof Plugin) this.addPlugin(plugin);
+      else if (plugin.default instanceof Plugin) this.addPlugin(plugin.default);
+    });
+
     return this;
   }
 

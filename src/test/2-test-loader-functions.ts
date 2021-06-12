@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import assert from 'assert';
+import path from 'path';
 import Plugger from '../index';
 import { loaderProps } from '../constants';
 
@@ -45,6 +46,40 @@ describe('Loader functions test', () => {
         assert.throws(() => {
           parent.addPlugin(childSameName);
         }, Plugger.errorTypes.ConflictError);
+      });
+    });
+
+    describe('#addFolder(dirName: string)', () => {
+      it('should load all plugins in a directory', () => {
+        const parent = new Plugger('parent');
+        parent.addFolder('test-files/plugins');
+
+        assert.notStrictEqual(parent.getPlugin('test1'), null);
+        assert.notStrictEqual(parent.getPlugin('test2'), null);
+        assert.notStrictEqual(parent.getPlugin('test3'), null);
+      }).timeout(5000);
+
+      it('should support relative paths and load all plugins in a directory', () => {
+        const parent = new Plugger('parent');
+        parent.addFolder('./test-files/plugins');
+
+        assert.notStrictEqual(parent.getPlugin('test1'), null);
+        assert.notStrictEqual(parent.getPlugin('test2'), null);
+        assert.notStrictEqual(parent.getPlugin('test3'), null);
+      }).timeout(5000);
+
+      it('should support absolute paths and load all plugins in a directory', () => {
+        const parent = new Plugger('parent');
+        parent.addFolder(path.resolve(__dirname, './test-files/plugins'));
+
+        assert.notStrictEqual(parent.getPlugin('test1'), null);
+        assert.notStrictEqual(parent.getPlugin('test2'), null);
+        assert.notStrictEqual(parent.getPlugin('test3'), null);
+      }).timeout(5000);
+
+      it('should throw an error if the directory does not exist', () => {
+        const parent = new Plugger('parent');
+        assert.throws(() => { parent.addFolder(path.resolve(__dirname, './test-files/nonexistent')); });
       });
     });
 

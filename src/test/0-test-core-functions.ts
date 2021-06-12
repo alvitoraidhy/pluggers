@@ -1,6 +1,7 @@
 import assert from 'assert';
 import path from 'path';
 import Plugger from '../index';
+import test from './test-files/plugin';
 
 describe('Core functions test', () => {
   describe('Plugger(name: string)', () => {
@@ -16,7 +17,7 @@ describe('Core functions test', () => {
 
   describe('Plugger.fromJsonFile(jsonFile?: string, props?: string[])', () => {
     it('should create an instance from \'package.json\'', () => {
-      const plugin = Plugger.fromJsonFile();
+      const plugin = test();
 
       assert.strictEqual(plugin.getName(), 'test-package-json');
 
@@ -25,7 +26,7 @@ describe('Core functions test', () => {
     });
 
     it('should create an instance from \'test.json\'', () => {
-      const plugin = Plugger.fromJsonFile('test.json');
+      const plugin = Plugger.fromJsonFile('test-files/test.json');
 
       assert.strictEqual(plugin.getName(), 'test-json');
 
@@ -35,7 +36,7 @@ describe('Core functions test', () => {
     });
 
     it('should support relative paths and create an instance from \'test.json\'', () => {
-      const plugin = Plugger.fromJsonFile('./test.json');
+      const plugin = Plugger.fromJsonFile('./test-files/test.json');
 
       assert.strictEqual(plugin.getName(), 'test-json');
 
@@ -45,7 +46,7 @@ describe('Core functions test', () => {
     });
 
     it('should support absolute paths and create an instance from \'test.json\'', () => {
-      const plugin = Plugger.fromJsonFile(path.resolve(__dirname, 'test.json'));
+      const plugin = Plugger.fromJsonFile(path.resolve(__dirname, './test-files/test.json'));
 
       assert.strictEqual(plugin.getName(), 'test-json');
 
@@ -55,7 +56,7 @@ describe('Core functions test', () => {
     });
 
     it('should not include unspecified properties', () => {
-      const plugin = Plugger.fromJsonFile('test.json', ['version']);
+      const plugin = Plugger.fromJsonFile('test-files/test.json', ['version']);
 
       assert.strictEqual(plugin.getName(), 'test-json');
 

@@ -241,7 +241,7 @@ An array of `instance`'s required plugins' names and metadatas (`{ name: string,
 
 #### `instance.addPlugin(plugin: Plugger, { priority?: number })`
 
-Loads `plugin` to `instance`. `plugin` is a Plugger that you want to load. `priority` is the load order priority of `plugin`, which is optional. If `priority` is not provied, then the priority will default to `plugin.pluginConfig.defaultPriority`.
+Loads `plugin` to `instance`. `plugin` is a plugin that you want to load. `priority` is the load order priority of `plugin`, which is optional. If `priority` is not provied, then the priority will default to `plugin.pluginConfig.defaultPriority`.
 
 ##### Returns
 
@@ -250,6 +250,19 @@ Loads `plugin` to `instance`. `plugin` is a Plugger that you want to load. `prio
 ##### Throws
 
 If a plugin with the same name is already loaded (`Plugger.errorTypes.ConflictError`)
+
+#### `instance.addFolder(dirName: string)`
+
+Loads all packages in `dirName` that directly export a Plugger instance. `dirName` is relative to the file that runs the method. Any other packages that don't export a Plugger instance will be silently ignored.
+
+##### Returns
+
+`instance` (`Plugger`)
+
+##### Throws
+
+- If `dirName` directory does not exist (`Error`)
+- The same as `addPlugin()`
 
 #### `instance.removePlugin(plugin: Plugger)`
 
