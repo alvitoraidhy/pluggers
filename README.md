@@ -1,7 +1,8 @@
 # Pluggers
 
+[![npm](https://img.shields.io/npm/v/pluggers.svg)](https://www.npmjs.com/package/pluggers)
 [![CircleCI](https://circleci.com/gh/alvitoraidhy/pluggers.svg?style=shield)](https://circleci.com/gh/alvitoraidhy/pluggers)
-[![codecov](https://codecov.io/gh/alvitoraidhy/pluggers/branch/master/graph/badge.svg?token=MZY3IEV0HS)](https://codecov.io/gh/alvitoraidhy/pluggers)
+[![Codecov](https://codecov.io/gh/alvitoraidhy/pluggers/branch/master/graph/badge.svg?token=MZY3IEV0HS)](https://codecov.io/gh/alvitoraidhy/pluggers)
 
 *A convenient plugin manager library.*
 
