@@ -1,16 +1,8 @@
 import assert from 'assert';
-import Plugger from '../index';
+import { Plugger } from '../index';
 
-describe('Plugin functions test', () => {
+describe('Base plugin functions test', () => {
   describe('Plugger(name: string)', () => {
-    describe('#getName()', () => {
-      it('should return the plugin\'s name', () => {
-        const name = 'plugin';
-        const plugin = new Plugger(name);
-        assert.strictEqual(plugin.getName(), name);
-      });
-    });
-
     describe('#getContext()', () => {
       it('should be persistent during runtime', () => {
         const plugin = new Plugger('plugin');
@@ -34,29 +26,29 @@ describe('Plugin functions test', () => {
       });
     });
 
-    describe('#requirePlugin(name: string, metadata?: object)', () => {
+    describe('#requirePlugin(metadata: { name: string, [key: string]: unknown })', () => {
       it('should add the plugin as a requirement without metadata', () => {
         const parent = new Plugger('parent');
         assert.doesNotThrow(() => {
-          parent.requirePlugin('required');
+          parent.requirePlugin({ name: 'required' });
         });
       });
 
       it('should add the plugin as a requirement with metadata', () => {
         const parent = new Plugger('parent');
         assert.doesNotThrow(() => {
-          parent.requirePlugin('required', { version: '1.0.0' });
+          parent.requirePlugin({ name: 'required', version: '1.0.0' });
         });
       });
 
       it('should throw an error (ConflictError) when the plugin is already required', () => {
         const parent = new Plugger('parent');
 
-        const requiredPluginName = 'required';
-        parent.requirePlugin(requiredPluginName);
+        const requiredPluginMetadata = { name: 'required' };
+        parent.requirePlugin(requiredPluginMetadata);
 
         assert.throws(() => {
-          parent.requirePlugin(requiredPluginName);
+          parent.requirePlugin(requiredPluginMetadata);
         }, Plugger.errorTypes.ConflictError);
       });
     });
@@ -66,7 +58,7 @@ describe('Plugin functions test', () => {
         const parent = new Plugger('parent');
 
         const requiredPluginName = 'required';
-        parent.requirePlugin(requiredPluginName);
+        parent.requirePlugin({ name: requiredPluginName });
 
         assert.doesNotThrow(() => {
           parent.removeRequiredPlugin(requiredPluginName);
@@ -98,11 +90,8 @@ describe('Plugin functions test', () => {
           'plugin7',
         ];
 
-        pluginRequirements.forEach((requiredPlugin) => plugin.requirePlugin(requiredPlugin));
-        const requiredPlugins = plugin.getRequiredPlugins().reduce((acc: string[], e) => {
-          acc.push(e.name);
-          return acc;
-        }, []);
+        pluginRequirements.forEach((x) => plugin.requirePlugin({ name: x }));
+        const requiredPlugins = plugin.getRequiredPlugins().map((x) => x.name);
 
         assert.deepStrictEqual(requiredPlugins, pluginRequirements);
       });
@@ -123,7 +112,7 @@ describe('Plugin functions test', () => {
 
         // Add both optional and required plugins
         combinedArr.forEach((requiredPlugin) => {
-          plugin.requirePlugin(requiredPlugin);
+          plugin.requirePlugin({ name: requiredPlugin });
           const requiredPlugins = plugin.getRequiredPlugins();
           assert.strictEqual(requiredPlugins.some((x) => x.name === requiredPlugin), true);
         });
@@ -134,6 +123,59 @@ describe('Plugin functions test', () => {
           const requiredPlugins = plugin.getRequiredPlugins();
           assert.strictEqual(requiredPlugins.some((x) => x.name === optionalPlugin), false);
         });
+      });
+    });
+
+    describe('#requires(metadata: { name: string, [key: string]: unknown })', () => {
+      it('should return true when a plugin with the exact metadata is found as a requirement', () => {
+        const parent = new Plugger('parent');
+
+        const metadata = { name: 'required', version: '1.0.0' };
+        parent.requirePlugin(metadata);
+
+        assert.strictEqual(parent.requires(metadata), true);
+      });
+
+      it('should return false when a plugin with the exact metadata is not found as a requirement', () => {
+        const parent = new Plugger('parent');
+
+        const metadata = { name: 'required', version: '1.0.0' };
+        const anotherMetadata = { name: 'required', version: '2.0.0' };
+        parent.requirePlugin(metadata);
+
+        assert.strictEqual(parent.requires(anotherMetadata), false);
+      });
+
+      it('should return false when the plugin doesn\'t have any requirements', () => {
+        const parent = new Plugger('parent');
+
+        const metadata = { name: 'required', version: '1.0.0' };
+
+        assert.strictEqual(parent.requires(metadata), false);
+      });
+    });
+
+    describe('#getState()', () => {
+      it('should return null if the plugin is uninitiated', () => {
+        const plugin = new Plugger('plugin');
+
+        assert.strictEqual(plugin.getState(), null);
+      });
+    });
+
+    describe('#getStatus()', () => {
+      it('should return \'ready\' if the plugin is uninitiated', () => {
+        const plugin = new Plugger('plugin');
+
+        assert.strictEqual(plugin.getStatus(), 'ready');
+      });
+    });
+
+    describe('#isInitialized()', () => {
+      it('should return false if the plugin is uninitiated', () => {
+        const plugin = new Plugger('plugin');
+
+        assert.strictEqual(plugin.isInitialized(), false);
       });
     });
   });

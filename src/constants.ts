@@ -3,14 +3,16 @@
 export const undefinedPriority: number = Symbol.for('undefinedPriority') as unknown as number; // Must be JSON-safe
 export const pluginProps: unique symbol = Symbol.for('pluginProps');
 export const loaderProps: unique symbol = Symbol.for('loaderProps');
+export const pluggerProps: unique symbol = Symbol.for('pluggerProps');
+export const asyncProps: unique symbol = Symbol.for('asyncProps');
 export interface CallbacksInterface {
-  init: (pluginsStates: { [index: string]: any }, config: {[key: string]: string} | null) => any;
-  error: (event: string, error: Error) => Error | null;
-  shutdown: (state: any, config: {[key: string]: string} | null) => void;
+  init: (pluginsStates?: { [key: string]: any }) => unknown;
+  error: (event: string, error: Error) => Promise<Error> | Promise<null> | Error | null;
+  shutdown: (state: any) => Promise<void> | void;
 }
 export const defaultCallbacks: CallbacksInterface = {
   init: () => {},
-  error: (event:string, error: Error) => error,
+  error: (event: string, error: Error) => error,
   shutdown: () => {},
 };
 export const errorTypes = {
@@ -40,13 +42,6 @@ export const errorTypes = {
       super(message);
       this.name = 'InitializeError';
       Object.setPrototypeOf(this, InitializeError.prototype);
-    }
-  },
-  IgnoreError: class IgnoreError extends Error {
-    constructor(message: string) {
-      super(message);
-      this.name = 'IgnoreError';
-      Object.setPrototypeOf(this, IgnoreError.prototype);
     }
   },
 };
