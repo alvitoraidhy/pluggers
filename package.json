@@ -11,7 +11,7 @@
     "build": "rimraf ./lib && tsc && copyfiles -u 1 \"./src/**/*.!(ts)\" ./lib/",
     "prepublishOnly": "npm run build",
     "doc:clean": "rimraf ./docs",
-    "doc:generate": "npm run doc:clean && typedoc ./src/index.ts",
+    "doc:generate": "typedoc ./src/index.ts",
     "doc:watch": "typedoc --watch",
     "test": "ts-mocha \"./src/test/*.ts\" ",
     "test:js": "npm run build && mocha \"./lib/test/**/*.js\"",
