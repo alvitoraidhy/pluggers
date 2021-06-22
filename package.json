@@ -13,7 +13,7 @@
     "postpublish": "npm run doc:generate && npm run doc:commit && npm run doc:push",
     "doc:clean": "rimraf ./docs",
     "doc:watch": "typedoc --watch",
-    "doc:generate": "typedoc ./src/index.ts",
+    "doc:generate": "typedoc",
     "doc:commit": "cd ./docs && git add . && cross-var git commit -m \"Update documentations for $npm_package_version\"",
     "doc:push": "cd ./docs && git push",
     "test": "ts-mocha \"./src/test/*.ts\" ",

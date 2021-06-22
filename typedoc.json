@@ -4,7 +4,6 @@
   "disableOutputCheck": true,
   "includeVersion": true,
   "out": "./docs",
-  "excludePrivate": true,
   "sort": ["source-order"],
   "categorizeByGroup": false,
   "categoryOrder": ["Constructor", "Base", "Plugin", "Loader", "*"]
