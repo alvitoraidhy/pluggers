@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import assert from 'assert';
-import { Plugger } from '../index';
+import Plugger from '../index';
 
 describe('Base loader functions test', () => {
   describe('Plugger(name: string)', () => {
@@ -94,10 +94,10 @@ describe('Base loader functions test', () => {
 
         const child = new Plugger('child');
 
-        parent.addPlugin(child).initPlugin(child);
-
-        assert.strictEqual(child.isInitialized(), true);
-        assert.throws(() => parent.removePlugin(child), Plugger.errorTypes.InitializeError);
+        return parent.addPlugin(child).initPlugin(child).then(() => {
+          assert.strictEqual(child.isInitialized(), true);
+          assert.throws(() => { parent.removePlugin(child); }, Plugger.errorTypes.InitializeError);
+        });
       });
 
       it('should throw an error (LoadError) when the requested plugin is not loaded', () => {

@@ -1,0 +1,10 @@
+{
+  "name": "Pluggers",
+  "theme": "./node_modules/typedoc-github-wiki-theme/dist",
+  "entryPoints": ["./src/index.ts", "./src/constants.ts"],
+  "out": "./docs",
+  "excludePrivate": true,
+  "sort": ["source-order"],
+  "categorizeByGroup": false,
+  "categoryOrder": ["Constructor", "Base", "Plugin", "Loader", "*"]
+}

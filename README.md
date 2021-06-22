@@ -12,11 +12,9 @@
 
 ## Features & Plans
 
-- [x] **Convenient** plugin loading and unloading
+- [X] **Synchronous** or **Asynchronous** plugin loading
 - [x] **Flexible access** between plugins
 - [x] **Priority-based** load order (explicit or automatic)
-- [x] **Centralized configuration** system
-- [ ] **Asynchronous** plugin loading (configurable)
 
 ## Installation
 
@@ -77,10 +75,12 @@ const master = new Plugger('master');
 master.addPlugin(require('./plugin1'));
 master.addPlugin(require('./plugin2'));
 
-master.initAll();
+master.initAll().then(() => {
+  console.log('Complete!')
+});
 ```
 
-The above codes will print "Hello World!" if `master.js` is executed.
+The above codes will print "Hello World!" and then "Complete!" if `master.js` is executed.
 
 ## API
 
@@ -94,7 +94,7 @@ Some common terms:
 
 ### Creating an instance
 
-#### `Plugger(name: string)`
+#### `Plugger(name?: string)`
 
 `name` is the name of the instance. Don't forget to use `new`, since `Plugger` is a class.
 
@@ -114,7 +114,7 @@ A new Plugger instance.
 
 #### `Plugger.fromJsonFile(fileName?: string, props?: string[])`
 
-Creates a Plugger instance from a JSON file. `filename` is the file name of the JSON relative to the file's directory that runs the method, defaults to `'package.json'`. `props` is an optional argument that specifies which properties to be included as the metadata of the instance. JSON must include `'name'` for the instance's name, everything else will be stored to `instance.pluginConfig.metadata`.
+Creates a Plugger instance from a JSON file. `filename` is the file name of the JSON, relative to `process.cwd()`, defaults to `'package.json'`. `props` is an optional argument that specifies which properties to be included as the metadata of the instance. JSON must include `'name'` for the instance's name. Everything will be stored to `instance.metadata`.
 
 `./package.json`
 
@@ -129,18 +129,52 @@ Creates a Plugger instance from a JSON file. `filename` is the file name of the 
 
 ```javascript
 ...
-const plugin = Plugger.fromJsonFile();
+const plugin = await Plugger.fromJsonFile();
 
 // 'myPlugin'
 console.log(plugin.getName());
 
-// '{"version":"1.0.0"}'
-console.log(String(plugin.pluginConfig.metadata));
+// '{"name": "myPlugin", "version":"1.0.0"}'
+console.log(JSON.stringify(plugin.metadata));
 ```
 
 ##### Returns
 
-A new Plugger instance.
+A promise that resolves to a new Plugger instance (`Promise<Plugger>`).
+
+##### Throws
+
+If `fileName` does not exist (`Error`)
+
+#### `Plugger.fromJsonFileSync(fileName?: string, props?: string[])`
+
+Synchronous counterpart of `Plugger.fromJsonFile()`.
+
+`./package.json`
+
+```javascript
+{
+  "name": "myPlugin",
+  "version": "1.0.0"
+}
+```
+
+`./index.js`
+
+```javascript
+...
+const plugin = Plugger.fromJsonFileSync();
+
+// 'myPlugin'
+console.log(plugin.getName());
+
+// '{"name": "myPlugin", "version":"1.0.0"}'
+console.log(String(plugin.metadata));
+```
+
+##### Returns
+
+A new Plugger instance (`Plugger`).
 
 ##### Throws
 
@@ -148,7 +182,7 @@ If `fileName` does not exist (`Error`)
 
 ### As a plugin
 
-#### `instance.pluginConfig.metadata`
+#### `instance.metadata`
 
 **Type**: `Object`\
 **Default**: `{}`\
@@ -238,6 +272,18 @@ An array of `instance`'s required plugins' names and metadatas (`{ name: string,
 
 \-
 
+#### `instance.requires(metadata: object)`
+
+Checks whether `instance` requires a plugin with the metadata `metadata` or not.
+
+##### Returns
+
+`true` if `instance` requires a plugin with the metadata `metadata`, `false` if not (`boolean`)
+
+##### Throws
+
+\-
+
 ### As a loader
 
 #### `instance.addPlugin(plugin: Plugger, { priority?: number })`
@@ -254,7 +300,20 @@ If a plugin with the same name is already loaded (`Plugger.errorTypes.ConflictEr
 
 #### `instance.addFolder(dirName: string)`
 
-Loads all packages in `dirName` that directly export a Plugger instance. `dirName` is relative to the file that runs the method. Any other packages that don't export a Plugger instance will be silently ignored.
+Loads all packages in `dirName` that directly export a Plugger instance. `dirName` is relative to `process.cwd()`. Any other packages that don't export a Plugger instance will be silently ignored.
+
+##### Returns
+
+A promise that resolves to `instance` (`Promise<Plugger>`)
+
+##### Throws
+
+- If `dirName` directory does not exist (`Error`)
+- The same as `addPlugin()`
+
+#### `instance.addFolderSync(dirName: string)`
+
+Synchronous counterpart of `instance.addFolder()`.
 
 ##### Returns
 

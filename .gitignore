@@ -1,5 +1,5 @@
 package-lock.json
 node_modules/
-/build
-.nyc_output/
+lib/
 coverage/
+.temp/

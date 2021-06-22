@@ -1,11 +1,11 @@
 import assert from 'assert';
-import { AsyncPlugger } from '../index';
+import Plugger from '../index';
 
-describe('Asynchronous plugin functions test', () => {
-  describe('AsyncPlugger(name: string)', () => {
+describe('Plugin functions test', () => {
+  describe('Plugger(name: string)', () => {
     describe('#selfInit(pluginsStates?: { [key: string]: any })', () => {
       it('should initialize the plugin', async () => {
-        const plugin = new AsyncPlugger('plugin');
+        const plugin = new Plugger('plugin');
 
         const state = 'initialized state';
         plugin.pluginCallbacks.init = async () => state;
@@ -18,7 +18,7 @@ describe('Asynchronous plugin functions test', () => {
       });
 
       it('should throw the error when an error occured while initializing', async () => {
-        const plugin = new AsyncPlugger('plugin');
+        const plugin = new Plugger('plugin');
 
         plugin.pluginCallbacks.init = async () => { throw new Error(); };
 
@@ -26,7 +26,7 @@ describe('Asynchronous plugin functions test', () => {
       });
 
       it('should be able to ignore the error when an error occured while initializing', async () => {
-        const plugin = new AsyncPlugger('plugin');
+        const plugin = new Plugger('plugin');
 
         plugin.pluginCallbacks.init = async () => { throw new Error(); };
         plugin.pluginCallbacks.error = async () => null;
@@ -37,7 +37,7 @@ describe('Asynchronous plugin functions test', () => {
 
     describe('#selfShutdown()', () => {
       it('should shutdown the plugin', async () => {
-        const plugin = new AsyncPlugger('plugin');
+        const plugin = new Plugger('plugin');
 
         const state = 'initialized state';
         plugin.pluginCallbacks.init = async () => state;
@@ -60,7 +60,7 @@ describe('Asynchronous plugin functions test', () => {
       });
 
       it('should throw the error when an error occured while shutting down', async () => {
-        const plugin = new AsyncPlugger('plugin');
+        const plugin = new Plugger('plugin');
 
         plugin.pluginCallbacks.shutdown = async () => { throw new Error(); };
 
@@ -68,7 +68,7 @@ describe('Asynchronous plugin functions test', () => {
       });
 
       it('should be able to ignore the error when an error occured while shutting down', async () => {
-        const plugin = new AsyncPlugger('plugin');
+        const plugin = new Plugger('plugin');
 
         plugin.pluginCallbacks.shutdown = async () => { throw new Error(); };
         plugin.pluginCallbacks.error = async () => null;

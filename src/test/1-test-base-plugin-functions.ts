@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { Plugger } from '../index';
+import Plugger from '../index';
 
 describe('Base plugin functions test', () => {
   describe('Plugger(name: string)', () => {

@@ -1,3 +1,3 @@
 import Plugger from '../../../../index';
 
-export default new Plugger('test2');
+export default new Plugger('test3');
