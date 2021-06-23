@@ -106,7 +106,7 @@ There are 3 types of priorities that can be used, in order of the load order:
   Plugins with undefined priorities will be initialized after plugins with positive number priorities with the order of which plugin gets loaded with `addPlugin()` first.
 
 - **Negative priority**, which is from `-Infinity` to `-1`.\
-  Negative priorities work like how negative indexes work in Python (ex: a plugin with the priority of `-1` will be loaded last, `-2` will be initialized second last, etc). Plugins with negative priorities will be processed after plugins with positive number priorities and undefined priorities, with the order from the lowest number (`-Infinity`) to the highest number (`-1`), and will be initialized according to their respective priorities.
+  Negative priorities work like how negative indexes work in Python (ex: a plugin with the priority of `-1` will be initialized last, `-2` will be initialized second last, etc). Plugins with negative priorities will be processed after plugins with positive number priorities and undefined priorities, with the order from the lowest number (`-Infinity`) to the highest number (`-1`), and will be initialized according to their respective priorities.
 
 All types of priorities are stackable, for example:
 

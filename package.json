@@ -14,7 +14,7 @@
     "doc:clean": "rimraf ./docs",
     "doc:watch": "typedoc --watch",
     "doc:generate": "typedoc",
-    "doc:commit": "cd ./docs && git add . && cross-var git commit -m \"Update documentations for $npm_package_version\" -m \"[ci-skip]\"",
+    "doc:commit": "cd ./docs && git add . && cross-var git commit -m \"[ci-skip] Update documentations for $npm_package_version\"",
     "doc:push": "cd ./docs && git push",
     "test": "ts-mocha \"./src/test/*.ts\" ",
     "test:js": "npm run build && mocha \"./lib/test/**/*.js\"",

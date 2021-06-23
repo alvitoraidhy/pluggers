@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import jsonfile from 'jsonfile';
 
@@ -54,13 +55,16 @@ class Plugger extends Loader {
    * console.log(JSON.stringify(plugin.metadata));
    * ```
    * @category Constructor
-   * @param jsonFile - Path to the JSON file.
+   * @param jsonFile - Path to the JSON file, or to a directory that contains a 'package.json' file.
    * @param props - Specifies which properties to be included as the metadata of the instance.
    * @returns A Promise that resolves to a new Plugger instance.
    */
   static async fromJsonFile(jsonFile = 'package.json', props: string[] | null = null): Promise<Plugger> {
     const dirPath = process.cwd();
-    const filePath = path.resolve(dirPath, jsonFile);
+    let filePath = path.resolve(dirPath, jsonFile);
+
+    const isDirectory = (await fs.promises.stat(filePath)).isDirectory();
+    if (isDirectory) filePath = path.resolve(filePath, 'package.json');
 
     const { name, ...data }: {
       name: string,
@@ -95,13 +99,16 @@ class Plugger extends Loader {
    * console.log(JSON.stringify(plugin.metadata));
    * ```
    * @category Constructor
-   * @param jsonFile - Path to the JSON file.
+   * @param jsonFile - Path to the JSON file, or to a directory that contains a 'package.json' file.
    * @param props - Specifies which properties to be included as the metadata of the instance.
    * @returns A new `Plugger` instance.
    */
   static fromJsonFileSync(jsonFile = 'package.json', props: string[] | null = null): Plugger {
     const dirPath = process.cwd();
-    const filePath = path.resolve(dirPath, jsonFile);
+    let filePath = path.resolve(dirPath, jsonFile);
+
+    const isDirectory = fs.statSync(filePath).isDirectory();
+    if (isDirectory) filePath = path.resolve(filePath, 'package.json');
 
     const { name, ...data }: {
       name: string,

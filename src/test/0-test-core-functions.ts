@@ -37,6 +37,14 @@ describe('Synchronous core functions test', () => {
       assert.strictEqual(metadata.version, '1.0.0');
     });
 
+    it('should create an instance from \'package.json\' using a directory path', () => {
+      const plugin = Plugger.fromJsonFileSync(path.join(__dirname, 'test-files'));
+
+      const { metadata } = plugin;
+      assert.strictEqual(metadata.name, 'test-package-json');
+      assert.strictEqual(metadata.version, '1.0.0');
+    });
+
     it('should create an instance from \'test.json\'', () => {
       const plugin = Plugger.fromJsonFileSync(path.join(__dirname, 'test-files/test.json'));
 
@@ -82,6 +90,14 @@ describe('Asynchronous core functions test', () => {
   describe('Plugger.fromJsonFile(jsonFile?: string, props?: string[])', () => {
     it('should create an instance from \'package.json\'', async () => {
       const plugin = await asyncTest();
+
+      const { metadata } = plugin;
+      assert.strictEqual(metadata.name, 'test-package-json');
+      assert.strictEqual(metadata.version, '1.0.0');
+    });
+
+    it('should create an instance from \'package.json\' using a directory path', async () => {
+      const plugin = await Plugger.fromJsonFile(path.join(__dirname, 'test-files'));
 
       const { metadata } = plugin;
       assert.strictEqual(metadata.name, 'test-package-json');
