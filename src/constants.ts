@@ -34,7 +34,7 @@ export interface CallbacksInterface {
    * @param pluginsStates - The state(s) of the instance's required plugin(s).
    * @returns The plugin's state.
    */
-  init: (pluginsStates?: { [key: string]: any }) => unknown;
+  init: (pluginsStates: { [key: string]: any }) => unknown;
 
   /**
    * The callback to be run when the instance encounters an uncaught error when running any of the

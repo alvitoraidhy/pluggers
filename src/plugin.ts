@@ -142,7 +142,7 @@ export default class Plugin extends PluginBase {
    *
    * @category Plugin
    */
-  async selfInit(pluginsStates?: Parameters<this['pluginCallbacks']['init']>[0]): Promise<this> {
+  async selfInit(pluginsStates: Parameters<this['pluginCallbacks']['init']>[0] = {}): Promise<this> {
     try {
       this[pluginProps].status = 'busy';
       this[pluginProps].state = await this.pluginCallbacks.init(pluginsStates);
