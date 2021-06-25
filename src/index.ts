@@ -3,6 +3,7 @@ import path from 'path';
 import jsonfile from 'jsonfile';
 
 import Loader from './loader';
+import { pluggerIdentifier } from './constants';
 
 /**
  * Some common terms:
@@ -36,6 +37,10 @@ class Plugger extends Loader {
    * @category Constructor
    * @param name - The name of the instance.
    */
+
+  /** @internal */
+  [pluggerIdentifier] = true;
+
   constructor(name: string = '') {
     super();
     if (name) this.metadata.name = name;

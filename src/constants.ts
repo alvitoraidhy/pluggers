@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-classes-per-file */
 export const undefinedPriority: number = Symbol.for('undefinedPriority') as unknown as number; // Must be JSON-safe
+export const pluggerIdentifier: unique symbol = Symbol.for('pluggerIdentifier');
 export const pluginProps: unique symbol = Symbol.for('pluginProps');
 export const loaderProps: unique symbol = Symbol.for('loaderProps');
 export const listenerProps: unique symbol = Symbol.for('listenerProps');

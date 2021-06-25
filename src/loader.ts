@@ -6,7 +6,7 @@ import glob from 'tiny-glob';
 import globSync from 'tiny-glob/sync';
 import flat from 'array.prototype.flat';
 import {
-  listenerProps, errorTypes, loaderProps, undefinedPriority,
+  listenerProps, errorTypes, loaderProps, undefinedPriority, pluggerIdentifier,
 } from './constants';
 import { compareMetadata } from './helpers';
 
@@ -217,8 +217,8 @@ export default class Loader extends LoaderBase {
       // eslint-disable-next-line global-require, import/no-dynamic-require
       const plugin = require(path.dirname(pluginPath));
 
-      if (plugin instanceof Plugin) this.addPlugin(plugin);
-      else if (plugin.default instanceof Plugin) this.addPlugin(plugin.default);
+      if (plugin[pluggerIdentifier]) this.addPlugin(plugin);
+      else if (plugin.default[pluggerIdentifier]) this.addPlugin(plugin.default);
     });
 
     return this;
@@ -245,8 +245,8 @@ export default class Loader extends LoaderBase {
       // eslint-disable-next-line global-require, import/no-dynamic-require
       const plugin = require(path.dirname(pluginPath));
 
-      if (plugin instanceof Plugin) this.addPlugin(plugin);
-      else if (plugin.default instanceof Plugin) this.addPlugin(plugin.default);
+      if (plugin[pluggerIdentifier]) this.addPlugin(plugin);
+      else if (plugin.default[pluggerIdentifier]) this.addPlugin(plugin.default);
     });
 
     return this;
