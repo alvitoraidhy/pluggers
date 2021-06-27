@@ -26,6 +26,9 @@ import { pluggerIdentifier } from './constants';
  * @public
  */
 class Plugger extends Loader {
+  /** @ignore */
+  [pluggerIdentifier] = true;
+
   /**
    * Creates a Plugger instance.
    *
@@ -37,10 +40,6 @@ class Plugger extends Loader {
    * @category Constructor
    * @param name - The name of the instance.
    */
-
-  /** @internal */
-  [pluggerIdentifier] = true;
-
   constructor(name: string = '') {
     super();
     if (name) this.metadata.name = name;
