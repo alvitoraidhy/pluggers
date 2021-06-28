@@ -61,7 +61,7 @@ const Plugger = require('pluggers').default;
 const plugin = new Plugger('plugin2');
 
 // Error will be thrown if a plugin named "plugin1" is not loaded
-plugin.requirePlugin('plugin1');
+plugin.requirePlugin({ name: 'plugin1' });
 
 plugin.pluginCallbacks.init = (plugins) => {
   const { plugin1 } = plugins
