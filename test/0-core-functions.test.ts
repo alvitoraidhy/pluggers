@@ -1,6 +1,6 @@
 import assert from "assert";
 import path from "path";
-import Plugger from "../index";
+import Plugger from "../src/index";
 import syncTest from "./test-files/syncPlugin";
 import asyncTest from "./test-files/asyncPlugin";
 

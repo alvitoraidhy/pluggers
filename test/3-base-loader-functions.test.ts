@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import assert from "assert";
-import Plugger from "../index";
+import Plugger from "../src/index";
 
 describe("Base loader functions test", () => {
   describe("Plugger(name: string)", () => {

@@ -2,8 +2,8 @@
 /* eslint-disable max-len */
 import assert from "assert";
 import path from "path";
-import Plugger from "../index";
-import { listenerProps } from "../constants";
+import Plugger from "../src/index";
+import { listenerProps } from "../src/constants";
 
 describe("Loader functions test", () => {
   describe("Plugger(name: string)", () => {
@@ -17,7 +17,7 @@ describe("Loader functions test", () => {
         ["test1", "test2", "test3"].forEach((name) => {
           assert.notStrictEqual(parent.getPlugin(name), null);
         });
-      }).timeout(5000);
+      });
 
       it("should support relative paths and load all plugins in a directory", async () => {
         const parent = new Plugger("parent");
@@ -30,7 +30,7 @@ describe("Loader functions test", () => {
         ["test1", "test2", "test3"].forEach((name) => {
           assert.notStrictEqual(parent.getPlugin(name), null);
         });
-      }).timeout(5000);
+      });
 
       it("should support absolute paths and load all plugins in a directory", async () => {
         const parent = new Plugger("parent");
@@ -41,7 +41,7 @@ describe("Loader functions test", () => {
         ["test1", "test2", "test3"].forEach((name) => {
           assert.notStrictEqual(parent.getPlugin(name), null);
         });
-      }).timeout(5000);
+      });
 
       it("should throw an error if the directory does not exist", async () => {
         const parent = new Plugger("parent");
@@ -59,7 +59,7 @@ describe("Loader functions test", () => {
         ["test1", "test2", "test3"].forEach((name) => {
           assert.notStrictEqual(parent.getPlugin(name), null);
         });
-      }).timeout(5000);
+      });
 
       it("should support relative paths and load all plugins in a directory", () => {
         const parent = new Plugger("parent");
@@ -72,7 +72,7 @@ describe("Loader functions test", () => {
         ["test1", "test2", "test3"].forEach((name) => {
           assert.notStrictEqual(parent.getPlugin(name), null);
         });
-      }).timeout(5000);
+      });
 
       it("should support absolute paths and load all plugins in a directory", () => {
         const parent = new Plugger("parent");
@@ -83,7 +83,7 @@ describe("Loader functions test", () => {
         ["test1", "test2", "test3"].forEach((name) => {
           assert.notStrictEqual(parent.getPlugin(name), null);
         });
-      }).timeout(5000);
+      });
 
       it("should throw an error if the directory does not exist", () => {
         const parent = new Plugger("parent");

@@ -1,6 +1,4 @@
-package-lock.json
 node_modules/
 lib/
 coverage/
-.temp/
 docs/
