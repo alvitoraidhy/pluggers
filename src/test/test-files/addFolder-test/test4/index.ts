@@ -1,1 +1,1 @@
-export default 'not a plugin';
+export default "not a plugin";

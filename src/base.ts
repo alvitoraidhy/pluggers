@@ -1,4 +1,4 @@
-import { errorTypes } from './constants';
+import { errorTypes } from "./constants";
 
 class Base {
   /**
@@ -13,7 +13,7 @@ class Base {
    *
    * @category Base
    */
-  metadata = {} as { name: string, version?: string, [key: string]: unknown };
+  metadata = {} as { name: string; version?: string; [key: string]: unknown };
 
   /**
    * Returns the name of the instance that is stored in `instance.metadata.name`.
@@ -21,7 +21,7 @@ class Base {
    * @category Base
    * @returns The name of the instance.
    */
-  getName() {
+  getName(): string {
     return this.metadata.name;
   }
 }

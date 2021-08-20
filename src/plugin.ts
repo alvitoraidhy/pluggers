@@ -1,20 +1,25 @@
 /* eslint-disable max-classes-per-file */
-import { Mutex } from 'async-mutex';
+import { Mutex } from "async-mutex";
 
 import {
-  pluginProps, asyncProps, CallbacksInterface, defaultCallbacks, errorTypes, undefinedPriority,
+  pluginProps,
+  asyncProps,
+  CallbacksInterface,
+  defaultCallbacks,
+  errorTypes,
+  undefinedPriority,
   PluginConfigInterface,
-} from './constants';
+} from "./constants";
 
-import Base from './base';
-import { compareMetadata } from './helpers';
+import Base from "./base";
+import { compareMetadata } from "./helpers";
 
 class PluginBase extends Base {
   private [pluginProps] = {
     context: {} as { [key: string]: unknown },
-    requiredPlugins: [] as Base['metadata'][],
-    status: 'ready' as 'ready' | 'busy' | 'initialized' | 'crashed',
-    state: null as unknown,
+    requiredPlugins: [] as Base["metadata"][],
+    status: "ready" as "ready" | "busy" | "initialized" | "crashed",
+    state: null as ReturnType<CallbacksInterface["init"]>,
   };
 
   /**
@@ -51,7 +56,7 @@ class PluginBase extends Base {
    * @category Plugin
    * @returns A list of metadata.
    */
-  getRequiredPlugins(): Base['metadata'][] {
+  getRequiredPlugins(): Base["metadata"][] {
     return this[pluginProps].requiredPlugins;
   }
 
@@ -63,9 +68,13 @@ class PluginBase extends Base {
    * @returns The current instance.
    */
   removeRequiredPlugin(name: string): this {
-    const requiredPlugin = this[pluginProps].requiredPlugins.find((x) => x.name === name);
+    const requiredPlugin = this[pluginProps].requiredPlugins.find(
+      (x) => x.name === name
+    );
     if (requiredPlugin === undefined) {
-      throw new errorTypes.RequirementError(`Plugin with the name "${name}" is not required`);
+      throw new errorTypes.RequirementError(
+        `Plugin with the name "${name}" is not required`
+      );
     }
 
     const index = this[pluginProps].requiredPlugins.indexOf(requiredPlugin);
@@ -83,9 +92,13 @@ class PluginBase extends Base {
    * @param metadata - The metadata of the plugin.
    * @returns The current instance.
    */
-  requirePlugin(metadata: Base['metadata']): this {
-    if (this[pluginProps].requiredPlugins.some((x) => x.name === metadata.name)) {
-      throw new errorTypes.ConflictError(`Plugin with the name "${metadata.name}" is already required`);
+  requirePlugin(metadata: Base["metadata"]): this {
+    if (
+      this[pluginProps].requiredPlugins.some((x) => x.name === metadata.name)
+    ) {
+      throw new errorTypes.ConflictError(
+        `Plugin with the name "${metadata.name}" is already required`
+      );
     }
 
     this[pluginProps].requiredPlugins.push({ ...metadata });
@@ -99,7 +112,7 @@ class PluginBase extends Base {
    * @param metadata - The metadata of the plugin.
    * @returns `true` if the instance requires the plugin, `false` if not.
    */
-  requires(metadata: Base['metadata']) {
+  requires(metadata: Base["metadata"]) {
     const requiredPlugins = this.getRequiredPlugins();
     return requiredPlugins.some((x) => compareMetadata(x, metadata));
   }
@@ -128,7 +141,7 @@ class PluginBase extends Base {
    * @category Plugin
    */
   isInitialized() {
-    return this.getStatus() === 'initialized';
+    return this.getStatus() === "initialized";
   }
 }
 
@@ -142,14 +155,16 @@ export default class Plugin extends PluginBase {
    *
    * @category Plugin
    */
-  async selfInit(pluginsStates: Parameters<this['pluginCallbacks']['init']>[0] = {}): Promise<this> {
+  async selfInit(
+    pluginsStates: Parameters<this["pluginCallbacks"]["init"]>[0] = {}
+  ): Promise<this> {
     try {
-      this[pluginProps].status = 'busy';
+      this[pluginProps].status = "busy";
       this[pluginProps].state = await this.pluginCallbacks.init(pluginsStates);
-      this[pluginProps].status = 'initialized';
+      this[pluginProps].status = "initialized";
     } catch (err) {
-      const result = await this.pluginCallbacks.error('init', err);
-      this[pluginProps].status = result ? 'crashed' : 'ready';
+      const result = await this.pluginCallbacks.error("init", err);
+      this[pluginProps].status = result ? "crashed" : "ready";
       if (result !== null) throw result;
     }
 
@@ -164,13 +179,13 @@ export default class Plugin extends PluginBase {
   async selfShutdown(): Promise<this> {
     const { state } = this[pluginProps];
     try {
-      this[pluginProps].status = 'busy';
+      this[pluginProps].status = "busy";
       await this.pluginCallbacks.shutdown(state);
       this[pluginProps].state = null;
-      this[pluginProps].status = 'ready';
+      this[pluginProps].status = "ready";
     } catch (err) {
-      const result = await this.pluginCallbacks.error('shutdown', err);
-      this[pluginProps].status = result ? 'crashed' : 'ready';
+      const result = await this.pluginCallbacks.error("shutdown", err);
+      this[pluginProps].status = result ? "crashed" : "ready";
       if (result !== null) throw result;
     }
 
@@ -184,7 +199,7 @@ export default class Plugin extends PluginBase {
    * @param func - Function to be run subsequently.
    * @returns The return value of the function
    */
-  createSession(func: () => Promise<unknown> | unknown) {
+  createSession(func: () => Promise<unknown> | unknown): Promise<unknown> {
     return this[asyncProps].mutex.runExclusive(func);
   }
 }

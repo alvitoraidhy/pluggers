@@ -4,7 +4,7 @@
 [![CircleCI](https://circleci.com/gh/alvitoraidhy/pluggers.svg?style=shield)](https://circleci.com/gh/alvitoraidhy/pluggers)
 [![Codecov](https://codecov.io/gh/alvitoraidhy/pluggers/branch/master/graph/badge.svg?token=MZY3IEV0HS)](https://codecov.io/gh/alvitoraidhy/pluggers)
 
-*A convenient plugin manager library.*
+_A convenient plugin manager library._
 
 [pluggers](https://www.npmjs.com/package/pluggers) is designed to make modular projects easier to create. [recursive-install](https://www.npmjs.com/package/recursive-install) is recommended for making plugins truly independent.
 
@@ -21,7 +21,7 @@
 
 ## Features & Plans
 
-- [X] **Synchronous** or **Asynchronous** plugin loading
+- [x] **Synchronous** or **Asynchronous** plugin loading
 - [x] **Flexible access** between plugins
 - [x] **Priority-based** load order (explicit or automatic)
 
@@ -39,13 +39,13 @@ npm install --save pluggers
 
 ```javascript
 // ./plugin1.js
-const Plugger = require('pluggers').default;
+const Plugger = require("pluggers").default;
 
-const plugin = new Plugger('plugin1');
+const plugin = new Plugger("plugin1");
 
 plugin.pluginCallbacks.init = () => {
   const test = "Hello World!";
-  return test
+  return test;
 };
 
 module.exports = plugin;
@@ -55,16 +55,16 @@ module.exports = plugin;
 
 ```javascript
 // ./plugin2.js
-const Plugger = require('pluggers').default;
+const Plugger = require("pluggers").default;
 
 // Error will be thrown if the plugin is using a used name ("plugin1") when loaded
-const plugin = new Plugger('plugin2');
+const plugin = new Plugger("plugin2");
 
 // Error will be thrown if a plugin named "plugin1" is not loaded
-plugin.requirePlugin({ name: 'plugin1' });
+plugin.requirePlugin({ name: "plugin1" });
 
 plugin.pluginCallbacks.init = (plugins) => {
-  const { plugin1 } = plugins
+  const { plugin1 } = plugins;
   console.log(plugin1);
 };
 
@@ -75,17 +75,17 @@ module.exports = plugin;
 
 ```javascript
 // ./master.js
-const Plugger = require('pluggers').default;
+const Plugger = require("pluggers").default;
 
 // Create instance
-const master = new Plugger('master');
+const master = new Plugger("master");
 
 // Add plugins
-master.addPlugin(require('./plugin1'));
-master.addPlugin(require('./plugin2'));
+master.addPlugin(require("./plugin1"));
+master.addPlugin(require("./plugin2"));
 
 master.initAll().then(() => {
-  console.log('Complete!')
+  console.log("Complete!");
 });
 ```
 

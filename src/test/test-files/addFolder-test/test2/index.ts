@@ -1,3 +1,3 @@
-import Plugger from '../../../../index';
+import Plugger from "../../../../index";
 
-module.exports = new Plugger('test2');
+module.exports = new Plugger("test2");

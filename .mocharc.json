@@ -1,4 +1,4 @@
 {
-    "recursive": true,
-    "reporter": "./reporter.js"
+  "recursive": true,
+  "reporter": "./reporter.js"
 }

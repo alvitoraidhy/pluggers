@@ -1,18 +1,22 @@
 /* eslint-disable max-classes-per-file */
-import { promisify } from 'util';
-import fs from 'fs';
-import path from 'path';
-import glob from 'tiny-glob';
-import globSync from 'tiny-glob/sync';
-import flat from 'array.prototype.flat';
+import { promisify } from "util";
+import fs from "fs";
+import path from "path";
+import glob from "tiny-glob";
+import globSync from "tiny-glob/sync";
+import flat from "array.prototype.flat";
 import {
-  listenerProps, errorTypes, loaderProps, undefinedPriority, pluggerIdentifier,
-} from './constants';
-import { compareMetadata } from './helpers';
+  listenerProps,
+  errorTypes,
+  loaderProps,
+  undefinedPriority,
+  pluggerIdentifier,
+} from "./constants";
+import { compareMetadata } from "./helpers";
 
-import Plugin from './plugin';
+import Plugin from "./plugin";
 
-const exitEvents = ['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT'];
+const exitEvents = ["exit", "SIGINT", "SIGTERM", "SIGQUIT"];
 
 interface PluginEntry {
   instance: Plugin;
@@ -42,8 +46,10 @@ class LoaderBase extends Plugin {
    * @returns A Plugger instance, or null if not found.
    */
   getPlugin(name: string): Plugin | null {
-    const plugin = this[loaderProps].pluginList.find((x) => x.instance.metadata.name === name);
-    return plugin ? plugin.instance as Plugin : null;
+    const plugin = this[loaderProps].pluginList.find(
+      (x) => x.instance.metadata.name === name
+    );
+    return plugin ? (plugin.instance as Plugin) : null;
   }
 
   /**
@@ -56,13 +62,19 @@ class LoaderBase extends Plugin {
    */
   addPlugin(plugin: Plugin, { priority = undefinedPriority } = {}): this {
     const { name } = plugin.metadata;
-    if (this.getPlugin(name)) { // Name must be unique
-      throw new errorTypes.ConflictError(`A plugin with the same name ('${name}') is already loaded`);
+    if (this.getPlugin(name)) {
+      // Name must be unique
+      throw new errorTypes.ConflictError(
+        `A plugin with the same name ('${name}') is already loaded`
+      );
     }
 
     const newState: PluginEntry = {
       instance: plugin,
-      priority: priority !== undefinedPriority ? priority : plugin.pluginConfig.defaultPriority,
+      priority:
+        priority !== undefinedPriority
+          ? priority
+          : plugin.pluginConfig.defaultPriority,
     };
 
     this[loaderProps].pluginList.push(newState);
@@ -78,14 +90,16 @@ class LoaderBase extends Plugin {
    */
   removePlugin(plugin: Plugin): this {
     if (!this.hasLoaded(plugin)) {
-      throw new errorTypes.LoadError('Plugin is not loaded');
+      throw new errorTypes.LoadError("Plugin is not loaded");
     }
 
     if (plugin.isInitialized()) {
-      throw new errorTypes.InitializeError('Plugin is initialized');
+      throw new errorTypes.InitializeError("Plugin is initialized");
     }
 
-    const newList = this[loaderProps].pluginList.filter((x) => x.instance !== plugin);
+    const newList = this[loaderProps].pluginList.filter(
+      (x) => x.instance !== plugin
+    );
     this[loaderProps].pluginList = newList;
     return this;
   }
@@ -104,13 +118,13 @@ class LoaderBase extends Plugin {
       - Negative priorities will be processed last
     */
     const { pluginList } = this[loaderProps];
-    const priorities = pluginList.filter((x) => x.priority !== undefinedPriority).reduce(
-      (acc: { [key: number]: Plugin[] }, e: PluginEntry) => {
+    const priorities = pluginList
+      .filter((x) => x.priority !== undefinedPriority)
+      .reduce((acc: { [key: number]: Plugin[] }, e: PluginEntry) => {
         if (!acc[e.priority]) acc[e.priority] = [];
         acc[e.priority].push(e.instance);
         return acc;
-      }, {},
-    );
+      }, {});
 
     const keys = Object.keys(priorities).map((e) => Number(e));
     const positives = keys.filter((x) => x >= 0).sort((a, b) => a - b);
@@ -120,7 +134,9 @@ class LoaderBase extends Plugin {
     const positiveArr = positives.map((x) => priorities[x]);
 
     // Process plugins with undefined priority
-    const undefinedPriorities = pluginList.filter((x) => x.priority === undefinedPriority);
+    const undefinedPriorities = pluginList.filter(
+      (x) => x.priority === undefinedPriority
+    );
     const undefinedPriorityPlugins = undefinedPriorities.map((x) => x.instance);
 
     if (undefinedPriorityPlugins.length > 0) {
@@ -128,7 +144,7 @@ class LoaderBase extends Plugin {
     }
 
     // Process plugins with negative priority
-    const arr: Plugin[] = negatives.reduce((acc: any[], e) => {
+    const arr = negatives.reduce((acc: Plugin[] | Plugin[][], e) => {
       const index = acc.length + e + 1;
       acc.splice(index < 0 ? 0 : index, 0, priorities[e]);
       return acc;
@@ -159,7 +175,9 @@ class LoaderBase extends Plugin {
           const plugin = this.getPlugin(requiredPlugins[j].name);
           const index = plugin ? arr.indexOf(plugin) : -1;
           if (!(plugin && index > -1)) {
-            throw new errorTypes.RequirementError(`Required plugin is not loaded -> '${requiredPlugins[j]}' (required by '${arr[i].metadata.name}')`);
+            throw new errorTypes.RequirementError(
+              `Required plugin is not loaded -> '${requiredPlugins[j]}' (required by '${arr[i].metadata.name}')`
+            );
           }
 
           if (i < index) {
@@ -172,7 +190,9 @@ class LoaderBase extends Plugin {
     }
 
     const { pluginList } = this[loaderProps];
-    const newLoadOrder = arr.map((x) => pluginList.find((y) => y.instance === x)!);
+    const newLoadOrder = arr.map(
+      (x) => pluginList.find((y) => y.instance === x) as PluginEntry
+    );
 
     this[loaderProps].pluginList = newLoadOrder;
 
@@ -210,15 +230,18 @@ export default class Loader extends LoaderBase {
     const dirPath = process.cwd();
     const fullPath = path.resolve(dirPath, dir);
 
-    await promisify(fs.access)(path.join(fullPath, '/'));
+    await promisify(fs.access)(path.join(fullPath, "/"));
 
-    const files = await glob(path.join(fullPath, '*/index.{ts,js}'), { absolute: true });
+    const files = await glob(path.join(fullPath, "*/index.{ts,js}"), {
+      absolute: true,
+    });
     files.forEach((pluginPath: string) => {
-      // eslint-disable-next-line global-require, import/no-dynamic-require
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const plugin = require(path.dirname(pluginPath));
 
       if (plugin[pluggerIdentifier]) this.addPlugin(plugin);
-      else if (plugin.default[pluggerIdentifier]) this.addPlugin(plugin.default);
+      else if (plugin.default[pluggerIdentifier])
+        this.addPlugin(plugin.default);
     });
 
     return this;
@@ -238,15 +261,18 @@ export default class Loader extends LoaderBase {
     const dirPath = process.cwd();
     const fullPath = path.resolve(dirPath, dir);
 
-    fs.accessSync(path.join(fullPath, '/'));
+    fs.accessSync(path.join(fullPath, "/"));
 
-    const files = globSync(path.join(fullPath, '*/index.{ts,js}'), { absolute: true });
+    const files = globSync(path.join(fullPath, "*/index.{ts,js}"), {
+      absolute: true,
+    });
     files.forEach((pluginPath: string) => {
-      // eslint-disable-next-line global-require, import/no-dynamic-require
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const plugin = require(path.dirname(pluginPath));
 
       if (plugin[pluggerIdentifier]) this.addPlugin(plugin);
-      else if (plugin.default[pluggerIdentifier]) this.addPlugin(plugin.default);
+      else if (plugin.default[pluggerIdentifier])
+        this.addPlugin(plugin.default);
     });
 
     return this;
@@ -261,39 +287,49 @@ export default class Loader extends LoaderBase {
    */
   initPlugin(plugin: Plugin): Promise<this> {
     if (!this.hasLoaded(plugin)) {
-      throw new errorTypes.LoadError('Plugin is not loaded');
+      throw new errorTypes.LoadError("Plugin is not loaded");
     }
 
     return plugin.createSession(async () => {
       if (plugin.isInitialized()) {
-        throw new errorTypes.InitializeError('Plugin is already initialized');
+        throw new errorTypes.InitializeError("Plugin is already initialized");
       }
 
-      const requiredStates: { [key: string]: ReturnType<Plugin['getState']> } = {};
+      const requiredStates: { [key: string]: ReturnType<Plugin["getState"]> } =
+        {};
 
-      await Promise.all(plugin.getRequiredPlugins().map(async (metadata) => {
-        const requiredPlugin = this.getPlugin(metadata.name);
-        if (!requiredPlugin) {
-          throw new errorTypes.RequirementError(`Required plugin is not loaded -> '${metadata.name}' (required by '${plugin.metadata.name}')`);
-        }
+      await Promise.all(
+        plugin.getRequiredPlugins().map(async (metadata) => {
+          const requiredPlugin = this.getPlugin(metadata.name);
+          if (!requiredPlugin) {
+            throw new errorTypes.RequirementError(
+              `Required plugin is not loaded -> '${metadata.name}' (required by '${plugin.metadata.name}')`
+            );
+          }
 
-        const loadedMetadata = requiredPlugin.metadata;
-        if (!compareMetadata(metadata, loadedMetadata)) {
-          throw new errorTypes.RequirementError(`
-            Required plugin's metadata does not match loaded plugin's metadata (required by '${plugin.metadata.name}')\n
+          const loadedMetadata = requiredPlugin.metadata;
+          if (!compareMetadata(metadata, loadedMetadata)) {
+            throw new errorTypes.RequirementError(`
+            Required plugin's metadata does not match loaded plugin's metadata (required by '${
+              plugin.metadata.name
+            }')\n
             Required plugin: ${JSON.stringify(metadata)}\n
             Loaded plugin: ${JSON.stringify(loadedMetadata)}
           `);
-        }
-
-        await requiredPlugin.createSession(() => {
-          if (!requiredPlugin.isInitialized()) {
-            throw new errorTypes.RequirementError(`Required plugin is not initialized -> '${metadata.name}' (required by '${plugin.metadata.name}')`);
           }
 
-          requiredStates[requiredPlugin.metadata.name] = requiredPlugin.getState();
-        });
-      }));
+          await requiredPlugin.createSession(() => {
+            if (!requiredPlugin.isInitialized()) {
+              throw new errorTypes.RequirementError(
+                `Required plugin is not initialized -> '${metadata.name}' (required by '${plugin.metadata.name}')`
+              );
+            }
+
+            requiredStates[requiredPlugin.metadata.name] =
+              requiredPlugin.getState();
+          });
+        })
+      );
 
       await plugin.selfInit(requiredStates);
 
@@ -310,11 +346,13 @@ export default class Loader extends LoaderBase {
   async initAll(): Promise<this> {
     const loadOrder = this.getLoadOrder();
 
-    await Promise.all(loadOrder.map(async (plugin) => {
-      if (!plugin.isInitialized()) {
-        await this.initPlugin(plugin);
-      }
-    }));
+    await Promise.all(
+      loadOrder.map(async (plugin) => {
+        if (!plugin.isInitialized()) {
+          await this.initPlugin(plugin);
+        }
+      })
+    );
 
     return this;
   }
@@ -328,23 +366,31 @@ export default class Loader extends LoaderBase {
    */
   shutdownPlugin(plugin: Plugin): Promise<this> {
     if (!this.hasLoaded(plugin)) {
-      throw new errorTypes.LoadError('Plugin is not loaded');
+      throw new errorTypes.LoadError("Plugin is not loaded");
     }
 
     return plugin.createSession(async () => {
       if (!plugin.isInitialized()) {
-        throw new errorTypes.InitializeError('Plugin is not initialized');
+        throw new errorTypes.InitializeError("Plugin is not initialized");
       }
 
-      const plugins = this.getPlugins().filter((x) => x.requires({ name: plugin.metadata.name }));
+      const plugins = this.getPlugins().filter((x) =>
+        x.requires({ name: plugin.metadata.name })
+      );
       const requiredBy: Plugin[] = [];
-      await Promise.all(plugins.map((x) => x.createSession(() => {
-        if (x.isInitialized()) requiredBy.push(x);
-      })));
+      await Promise.all(
+        plugins.map((x) =>
+          x.createSession(() => {
+            if (x.isInitialized()) requiredBy.push(x);
+          })
+        )
+      );
 
       if (requiredBy.length > 0) {
         const names = requiredBy.map((x) => x.metadata.name);
-        throw new errorTypes.RequirementError(`Plugin is required by ${requiredBy.length} initialized plugins: ${names}`);
+        throw new errorTypes.RequirementError(
+          `Plugin is required by ${requiredBy.length} initialized plugins: ${names}`
+        );
       }
 
       await plugin.selfShutdown();
@@ -361,11 +407,13 @@ export default class Loader extends LoaderBase {
    */
   async shutdownAll(): Promise<this> {
     const loadOrder = this.getLoadOrder().reverse();
-    await Promise.all(loadOrder.map(async (plugin) => {
-      if (plugin.isInitialized()) {
-        await this.shutdownPlugin(plugin);
-      }
-    }));
+    await Promise.all(
+      loadOrder.map(async (plugin) => {
+        if (plugin.isInitialized()) {
+          await this.shutdownPlugin(plugin);
+        }
+      })
+    );
 
     return this;
   }
@@ -383,7 +431,10 @@ export default class Loader extends LoaderBase {
    * @returns The current instance.
    */
   attachExitListener(): this {
-    if (!this[listenerProps].useExitListener && this[listenerProps].exitListener === null) {
+    if (
+      !this[listenerProps].useExitListener &&
+      this[listenerProps].exitListener === null
+    ) {
       const exitListener = () => this.shutdownAll();
       this[listenerProps].exitListener = exitListener;
 
@@ -405,7 +456,10 @@ export default class Loader extends LoaderBase {
    * @category Loader
    */
   detachExitListener(): this {
-    if (this[listenerProps].useExitListener && this[listenerProps].exitListener !== null) {
+    if (
+      this[listenerProps].useExitListener &&
+      this[listenerProps].exitListener !== null
+    ) {
       exitEvents.forEach((event) => {
         process.off(event, this[listenerProps].exitListener as () => void);
       });
