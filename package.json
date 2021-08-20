@@ -16,7 +16,7 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "postpublish": "npm run doc:generate && npm run doc:commit && npm run doc:push",
-    "build": "rimraf ./lib && tsc && copyfiles -u 1 \"./src/**/*.!(ts)\" ./lib/",
+    "build": "tsc --project tsconfig.prod.json",
     "lint": "eslint .",
     "format": "prettier --write .",
     "doc:clean": "rimraf ./docs",
@@ -26,7 +26,7 @@
     "doc:push": "cd ./docs && git push",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "test:ci-coverage": "npm run build && npm run test:coverage && codecov"
+    "test:ci-coverage": "npm run test:coverage && codecov"
   },
   "repository": {
     "type": "git",
