@@ -15,11 +15,11 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "postpublish": "npm run doc:generate",
+    "postpublish": "npm run docs:generate",
     "build": "tsc --project tsconfig.prod.json",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "doc:generate": "node ./scripts/docs-generator.cjs",
+    "docs:generate": "node ./scripts/docs-generator/index.cjs",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:ci-coverage": "npm run test:coverage && codecov"
