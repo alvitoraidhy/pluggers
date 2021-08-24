@@ -8,7 +8,7 @@ pkgs.mkShell {               # mkShell is a helper function
   ];
   shellHook =                # bash to run when you enter the shell 
   ''
-    echo "NodeJS v10";             
+    echo "Node.js v10";             
     echo "Start developing...";
   '';
 }
