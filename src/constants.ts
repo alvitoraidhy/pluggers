@@ -1,11 +1,13 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-classes-per-file */
-export const undefinedPriority: number = Symbol.for('undefinedPriority') as unknown as number; // Must be JSON-safe
-export const pluggerIdentifier: unique symbol = Symbol.for('pluggerIdentifier');
-export const pluginProps: unique symbol = Symbol.for('pluginProps');
-export const loaderProps: unique symbol = Symbol.for('loaderProps');
-export const listenerProps: unique symbol = Symbol.for('listenerProps');
-export const asyncProps: unique symbol = Symbol.for('asyncProps');
+export const undefinedPriority: number = Symbol.for(
+  "undefinedPriority"
+) as unknown as number; // Must be JSON-safe
+export const pluggerIdentifier: unique symbol = Symbol.for("pluggerIdentifier");
+export const pluginProps: unique symbol = Symbol.for("pluginProps");
+export const loaderProps: unique symbol = Symbol.for("loaderProps");
+export const listenerProps: unique symbol = Symbol.for("listenerProps");
+export const asyncProps: unique symbol = Symbol.for("asyncProps");
 
 /**
  * Plugin behaviour configuration interface.
@@ -17,7 +19,7 @@ export interface PluginConfigInterface {
    * This property can be used when a plugin is designed to always be loaded at a specific step of
    * an app (ex: designed to be loaded first as a core plugin or loaded last as the app runner).
    */
-  defaultPriority: number
+  defaultPriority: number;
 }
 
 /**
@@ -35,7 +37,7 @@ export interface CallbacksInterface {
    * @param pluginsStates - The state(s) of the instance's required plugin(s).
    * @returns The plugin's state.
    */
-  init: (pluginsStates: { [key: string]: any }) => unknown;
+  init: (pluginsStates: { [key: string]: unknown }) => unknown;
 
   /**
    * The callback to be run when the instance encounters an uncaught error when running any of the
@@ -49,7 +51,10 @@ export interface CallbacksInterface {
    * @param error - The error instance that was thrown.
    * @returns An error instance, or null to ignore the error.
    */
-  error: (event: string, error: Error) => Promise<Error> | Promise<null> | Error | null;
+  error: (
+    event: string,
+    error: Error
+  ) => Promise<Error> | Promise<null> | Error | null;
 
   /**
    * The callback to be run when the instance is shutting down.
@@ -63,37 +68,39 @@ export interface CallbacksInterface {
 }
 
 export const defaultCallbacks: CallbacksInterface = {
-  init: () => {},
+  init: () => null,
   error: (event: string, error: Error) => error,
-  shutdown: () => {},
+  shutdown: () => {
+    /* placeholder function */
+  },
 };
 
 export const errorTypes = {
   RequirementError: class RequirementError extends Error {
     constructor(message: string) {
       super(message);
-      this.name = 'RequirementError';
+      this.name = "RequirementError";
       Object.setPrototypeOf(this, RequirementError.prototype);
     }
   },
   ConflictError: class ConflictError extends Error {
     constructor(message: string) {
       super(message);
-      this.name = 'ConflictError';
+      this.name = "ConflictError";
       Object.setPrototypeOf(this, ConflictError.prototype);
     }
   },
   LoadError: class LoadError extends Error {
     constructor(message: string) {
       super(message);
-      this.name = 'LoadError';
+      this.name = "LoadError";
       Object.setPrototypeOf(this, LoadError.prototype);
     }
   },
   InitializeError: class InitializeError extends Error {
     constructor(message: string) {
       super(message);
-      this.name = 'InitializeError';
+      this.name = "InitializeError";
       Object.setPrototypeOf(this, InitializeError.prototype);
     }
   },

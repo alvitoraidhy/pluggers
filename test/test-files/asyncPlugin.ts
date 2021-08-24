@@ -1,6 +1,6 @@
-import Plugger from '../../index';
+import Plugger from "../../src/index";
 
-export default async () => {
+export default async (): Promise<Plugger> => {
   const currentCwd = process.cwd();
   process.chdir(__dirname);
   const instance = await Plugger.fromJsonFile();

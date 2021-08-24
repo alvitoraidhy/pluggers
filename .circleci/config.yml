@@ -1,4 +1,4 @@
-version: '2.1'
+version: "2.1"
 orbs:
   node: circleci/node@4.3.0
 
@@ -6,24 +6,24 @@ workflows:
   matrix-tests:
     jobs:
       - node/test:
-          override-ci-command: 'npm install'
           version: 16.3.0
-          run-command: 'test:all'
+          run-command: "test"
       - node/test:
-          override-ci-command: 'npm install'
           version: 14.17.1
-          run-command: 'test:all'
+          run-command: "test"
       - node/test:
-          override-ci-command: 'npm install'
           version: 12.22.1
-          run-command: 'test:all'
+          run-command: "test"
       - node/test:
-          override-ci-command: 'npm install'
           version: 10.24.1
-          run-command: 'test:all'
+          run-command: "test"
 
   test-with-coverage:
     jobs:
       - node/test:
-          override-ci-command: 'npm install'
-          run-command: 'test:ci'
+          run-command: "test:ci-coverage"
+
+  build-test:
+    jobs:
+      - node/test:
+          run-command: "build"

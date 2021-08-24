@@ -1,6 +1,6 @@
-import Plugger from '../../index';
+import Plugger from "../../src/index";
 
-export default () => {
+export default (): Plugger => {
   const currentCwd = process.cwd();
   process.chdir(__dirname);
   const instance = Plugger.fromJsonFileSync();

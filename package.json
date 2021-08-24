@@ -2,25 +2,27 @@
   "name": "pluggers",
   "version": "2.1.4",
   "description": "A convenient plugin manager library",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
   "files": [
-    "lib/**/*"
+    "lib",
+    "src",
+    "test"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "rimraf ./lib && tsc && copyfiles -u 1 \"./src/**/*.!(ts)\" ./lib/",
     "prepublishOnly": "npm run build",
-    "postpublish": "npm run doc:generate && npm run doc:commit && npm run doc:push",
-    "doc:clean": "rimraf ./docs",
-    "doc:watch": "typedoc --watch",
-    "doc:generate": "typedoc",
-    "doc:commit": "cd ./docs && git add . && cross-var git commit -m \"[ci-skip] Update documentations for $npm_package_version\"",
-    "doc:push": "cd ./docs && git push",
-    "test": "ts-mocha \"./src/test/*.ts\" ",
-    "test:js": "npm run build && mocha \"./lib/test/**/*.js\"",
-    "test:all": "npm run test && npm run test:js",
-    "test:coverage": "TS_NODE_COMPILER_OPTIONS='{\"target\":\"es6\"}' nyc --reporter=lcov npm test",
-    "test:ci": "npm run test:coverage && codecov"
+    "postpublish": "npm run docs:generate",
+    "build": "tsc --project tsconfig.prod.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "docs:generate": "node ./scripts/docs-generator/index.cjs",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:ci-coverage": "npm run test:coverage && codecov"
   },
   "repository": {
     "type": "git",
@@ -34,8 +36,8 @@
   "homepage": "https://github.com/alvitoraidhy/pluggers#readme",
   "devDependencies": {
     "@types/array.prototype.flat": "^1.2.1",
+    "@types/jest": "^27.0.1",
     "@types/jsonfile": "^6.0.0",
-    "@types/mocha": "^8.2.2",
     "@types/node": "^15.0.1",
     "@types/semver": "^7.3.6",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
@@ -44,14 +46,11 @@
     "copyfiles": "^2.4.1",
     "cross-var": "^1.1.0",
     "eslint": "^7.25.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-config-airbnb-typescript": "^12.3.1",
-    "eslint-import-resolver-typescript": "^2.4.0",
-    "eslint-plugin-import": "^2.22.1",
-    "mocha": "^8.3.2",
-    "nyc": "^15.1.0",
+    "eslint-config-prettier": "^8.3.0",
+    "jest": "^27.0.6",
+    "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
-    "ts-mocha": "^8.0.0",
+    "ts-jest": "^27.0.5",
     "typedoc": "^0.21.0",
     "typescript": "^4.3.2"
   },
