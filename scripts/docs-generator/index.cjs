@@ -111,7 +111,7 @@ const helpers = require("./helpers.cjs");
   await exec(`
     cd ${outDir} &&
     git add . &&
-    git commit -m "Update documentations for ${packageVersion}" &&
+    git commit -m "[ci skip] Update documentations for ${packageVersion}" &&
     git push;
   `);
 
