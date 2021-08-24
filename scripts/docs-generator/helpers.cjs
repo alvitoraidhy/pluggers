@@ -26,14 +26,16 @@ exports.getFiles = async (srcpath) => {
 exports.getFilesRecursive = async (directoryName, result = []) => {
   const files = await fs.promises.readdir(directoryName);
 
-  await Promise.all(files.map(async(file) => {
-    const fullPath = path.join(directoryName,file);
-    if (fs.statSync(path.join(fullPath)).isDirectory()) {
-      await exports.getFilesRecursive(fullPath, result)
-    } else {
-      result.push(fullPath);
-    }
-  }));
+  await Promise.all(
+    files.map(async (file) => {
+      const fullPath = path.join(directoryName, file);
+      if (fs.statSync(path.join(fullPath)).isDirectory()) {
+        await exports.getFilesRecursive(fullPath, result);
+      } else {
+        result.push(fullPath);
+      }
+    })
+  );
 
-  return result
+  return result;
 };
