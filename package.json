@@ -15,15 +15,11 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "postpublish": "npm run doc:generate && npm run doc:commit && npm run doc:push",
+    "postpublish": "npm run docs:generate",
     "build": "tsc --project tsconfig.prod.json",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "doc:clean": "rimraf ./docs",
-    "doc:watch": "typedoc --watch",
-    "doc:generate": "typedoc",
-    "doc:commit": "cd ./docs && git add . && cross-var git commit -m \"[ci-skip] Update documentations for $npm_package_version\"",
-    "doc:push": "cd ./docs && git push",
+    "docs:generate": "node ./scripts/docs-generator/index.cjs",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:ci-coverage": "npm run test:coverage && codecov"
