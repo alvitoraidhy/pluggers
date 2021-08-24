@@ -55,6 +55,7 @@
   "dependencies": {
     "array.prototype.flat": "^1.2.4",
     "async-mutex": "^0.3.1",
+    "ejs": "^3.1.6",
     "jsonfile": "^6.1.0",
     "semver": "^7.3.5",
     "tiny-glob": "^0.2.9"
