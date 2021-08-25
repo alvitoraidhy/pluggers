@@ -56,17 +56,22 @@ const helpers = require("./helpers.cjs");
   // ##########################################
   // 3. Get a list of versions, grouped by their major numbers
   console.log("Reading all versions of documentation...");
-  const docsVersions = await helpers.getDirectories(docsDir);
+  const generateVersions = async () => {
+    const docsVersions = await helpers.getDirectories(docsDir);
 
-  const groupedVersions = {};
-  docsVersions.forEach((ver) => {
-    const verInstance = new semver.SemVer(ver);
-    if (!groupedVersions[verInstance.major])
-      groupedVersions[verInstance.major] = [];
-    groupedVersions[verInstance.major].push(ver);
-  });
+    const groupedVersions = {};
+    docsVersions.forEach((ver) => {
+      const verInstance = new semver.SemVer(ver);
+      if (!groupedVersions[verInstance.major])
+        groupedVersions[verInstance.major] = [];
+      groupedVersions[verInstance.major].push(ver);
+    });
 
-  Object.keys(groupedVersions).forEach((x) => semver.rsort(groupedVersions[x]));
+    Object.keys(groupedVersions).forEach((x) => semver.rsort(groupedVersions[x]));
+    return groupedVersions;
+  }
+
+  const groupedVersions = await generateVersions();
 
   // ##########################################
   // 4. Delete old versions (smaller minor or patch number)
@@ -84,11 +89,16 @@ const helpers = require("./helpers.cjs");
   );
 
   // ##########################################
-  // 5. Render all templates
+  // 5. Refresh version list
+  console.log("Refreshing version list");
+  const newVersions = await generateVersions();
+
+  // ##########################################
+  // 6. Render all templates
   console.log("Rendering EJS templates...");
   const files = await helpers.getFilesRecursive(templatesDir);
 
-  const data = { versions: groupedVersions };
+  const data = { versions: newVersions };
 
   await Promise.all(
     files
@@ -106,7 +116,7 @@ const helpers = require("./helpers.cjs");
   );
 
   // ##########################################
-  // 6. Commit all changes
+  // 7. Commit all changes
   console.log("Commiting changes to 'gh-pages'...");
   await exec(`
     cd ${outDir} &&
@@ -116,7 +126,7 @@ const helpers = require("./helpers.cjs");
   `);
 
   // ##########################################
-  // 6. Commit all changes
+  // 8. Commit all changes
   console.log("Unmounting 'gh-pages' branch...");
   await exec(`git worktree remove ${outDir}`);
 })().catch(console.error);
