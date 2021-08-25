@@ -30,7 +30,7 @@
   "bugs": {
     "url": "https://github.com/alvitoraidhy/pluggers/issues"
   },
-  "homepage": "https://alvitoraidhy.github.io/pluggers",
+  "homepage": "https://alvitoraidhy.github.io/pluggers/",
   "devDependencies": {
     "@types/array.prototype.flat": "^1.2.1",
     "@types/jest": "^27.0.1",
