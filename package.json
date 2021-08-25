@@ -3,13 +3,10 @@
   "version": "2.2.0-1",
   "description": "A convenient plugin manager library",
   "directories": {
-    "lib": "lib",
-    "test": "test"
+    "lib": "lib"
   },
   "files": [
-    "lib",
-    "src",
-    "test"
+    "lib"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -33,7 +30,7 @@
   "bugs": {
     "url": "https://github.com/alvitoraidhy/pluggers/issues"
   },
-  "homepage": "https://github.com/alvitoraidhy/pluggers#readme",
+  "homepage": "https://alvitoraidhy.github.io/pluggers/",
   "devDependencies": {
     "@types/array.prototype.flat": "^1.2.1",
     "@types/jest": "^27.0.1",
