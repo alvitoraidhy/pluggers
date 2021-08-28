@@ -65,7 +65,7 @@ class Plugger extends Loader {
    */
   static async fromJsonFile(
     jsonFile = "package.json",
-    props: string[] | null = null
+    props?: string[]
   ): Promise<Plugger> {
     const dirPath = process.cwd();
     let filePath = path.resolve(dirPath, jsonFile);
@@ -83,7 +83,7 @@ class Plugger extends Loader {
     } = await jsonfile.readFile(filePath);
 
     const metadata =
-      props !== null
+      props
         ? props.reduce((acc: { [key: string]: unknown }, e) => {
             acc[e] = data[e];
             return acc;
@@ -116,7 +116,7 @@ class Plugger extends Loader {
    */
   static fromJsonFileSync(
     jsonFile = "package.json",
-    props: string[] | null = null
+    props?: string[]
   ): Plugger {
     const dirPath = process.cwd();
     let filePath = path.resolve(dirPath, jsonFile);
@@ -134,7 +134,7 @@ class Plugger extends Loader {
     } = jsonfile.readFileSync(filePath);
 
     const metadata =
-      props !== null
+      props
         ? props.reduce((acc: { [key: string]: unknown }, e) => {
             acc[e] = data[e];
             return acc;
