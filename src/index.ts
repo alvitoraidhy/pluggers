@@ -82,13 +82,12 @@ class Plugger extends Loader {
       [key: string]: unknown;
     } = await jsonfile.readFile(filePath);
 
-    const metadata =
-      props
-        ? props.reduce((acc: { [key: string]: unknown }, e) => {
-            acc[e] = data[e];
-            return acc;
-          }, {})
-        : data;
+    const metadata = props
+      ? props.reduce((acc: { [key: string]: unknown }, e) => {
+          acc[e] = data[e];
+          return acc;
+        }, {})
+      : data;
 
     const instance = new Plugger(name);
     instance.metadata = { ...instance.metadata, ...metadata };
@@ -133,13 +132,12 @@ class Plugger extends Loader {
       [key: string]: unknown;
     } = jsonfile.readFileSync(filePath);
 
-    const metadata =
-      props
-        ? props.reduce((acc: { [key: string]: unknown }, e) => {
-            acc[e] = data[e];
-            return acc;
-          }, {})
-        : data;
+    const metadata = props
+      ? props.reduce((acc: { [key: string]: unknown }, e) => {
+          acc[e] = data[e];
+          return acc;
+        }, {})
+      : data;
 
     const instance = new Plugger(name);
     instance.metadata = { ...instance.metadata, ...metadata };

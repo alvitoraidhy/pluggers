@@ -67,9 +67,11 @@ const helpers = require("./helpers.cjs");
       groupedVersions[verInstance.major].push(ver);
     });
 
-    Object.keys(groupedVersions).forEach((x) => semver.rsort(groupedVersions[x]));
+    Object.keys(groupedVersions).forEach((x) =>
+      semver.rsort(groupedVersions[x])
+    );
     return groupedVersions;
-  }
+  };
 
   const groupedVersions = await generateVersions();
 
