@@ -1,6 +1,5 @@
 const fs = require("fs");
 const path = require("path");
-const flat = require("array.prototype.flat");
 
 // ref: https://stackoverflow.com/a/40896897
 exports.getDirectories = async (srcpath) => {

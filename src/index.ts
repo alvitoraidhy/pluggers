@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import jsonfile from "jsonfile";
 
 import Loader from "./loader";
 import { pluggerIdentifier } from "./constants";
@@ -43,106 +42,6 @@ class Plugger extends Loader {
   constructor(name = "") {
     super();
     if (name) this.metadata.name = name;
-  }
-
-  /**
-   * Creates a Plugger instance from a JSON file asynchronously.
-   *
-   * @example
-   * ```javascript
-   * ...
-   * // ./package.json: { "name": "myPlugin", "version": "1.0.0" }
-   * const plugin = await Plugger.fromJsonFile();
-   * console.log(plugin.getName()); // 'myPlugin'
-   *
-   * // '{"name": "myPlugin", "version":"1.0.0"}'
-   * console.log(JSON.stringify(plugin.metadata));
-   * ```
-   * @category Constructor
-   * @param jsonFile - Path to the JSON file, or to a directory that contains a 'package.json' file.
-   * @param props - Specifies which properties to be included as the metadata of the instance.
-   * @returns A Promise that resolves to a new Plugger instance.
-   */
-  static async fromJsonFile(
-    jsonFile = "package.json",
-    props?: string[]
-  ): Promise<Plugger> {
-    const dirPath = process.cwd();
-    let filePath = path.resolve(dirPath, jsonFile);
-
-    const isDirectory = (await fs.promises.stat(filePath)).isDirectory();
-    if (isDirectory) filePath = path.resolve(filePath, "package.json");
-
-    const {
-      name,
-      ...data
-    }: {
-      name: string;
-      defaultPriority: number;
-      [key: string]: unknown;
-    } = await jsonfile.readFile(filePath);
-
-    const metadata = props
-      ? props.reduce((acc: { [key: string]: unknown }, e) => {
-          acc[e] = data[e];
-          return acc;
-        }, {})
-      : data;
-
-    const instance = new Plugger(name);
-    instance.metadata = { ...instance.metadata, ...metadata };
-
-    return instance;
-  }
-
-  /**
-   * Creates a Plugger instance from a JSON file synchronously.
-   *
-   * @example
-   * ```javascript
-   * ...
-   * // ./package.json: { "name": "myPlugin", "version": "1.0.0" }
-   * const plugin = Plugger.fromJsonFileSync();
-   * console.log(plugin.getName()); // 'myPlugin'
-   *
-   * // '{"name": "myPlugin", "version":"1.0.0"}'
-   * console.log(JSON.stringify(plugin.metadata));
-   * ```
-   * @category Constructor
-   * @param jsonFile - Path to the JSON file, or to a directory that contains a 'package.json' file.
-   * @param props - Specifies which properties to be included as the metadata of the instance.
-   * @returns A new `Plugger` instance.
-   */
-  static fromJsonFileSync(
-    jsonFile = "package.json",
-    props?: string[]
-  ): Plugger {
-    const dirPath = process.cwd();
-    let filePath = path.resolve(dirPath, jsonFile);
-
-    const isDirectory = fs.statSync(filePath).isDirectory();
-    if (isDirectory) filePath = path.resolve(filePath, "package.json");
-
-    const {
-      name,
-      ...data
-    }: {
-      name: string;
-      defaultPriority: number;
-      [key: string]: unknown;
-    } = jsonfile.readFileSync(filePath);
-
-    const metadata = props
-      ? props.reduce((acc: { [key: string]: unknown }, e) => {
-          acc[e] = data[e];
-          return acc;
-        }, {})
-      : data;
-
-    const instance = new Plugger(name);
-    instance.metadata = { ...instance.metadata, ...metadata };
-
-    return instance;
   }
 }
 

@@ -2,9 +2,6 @@
 import { promisify } from "util";
 import fs from "fs";
 import path from "path";
-import glob from "tiny-glob";
-import globSync from "tiny-glob/sync";
-import flat from "array.prototype.flat";
 import {
   listenerProps,
   errorTypes,
@@ -148,9 +145,9 @@ class LoaderBase extends Plugin {
       const index = acc.length + e + 1;
       acc.splice(index < 0 ? 0 : index, 0, priorities[e]);
       return acc;
-    }, flat(positiveArr));
+    }, positiveArr.flat());
 
-    return flat(arr);
+    return arr.flat();
   }
 
   /**
@@ -215,68 +212,6 @@ export default class Loader extends LoaderBase {
     useExitListener: false as boolean,
     exitListener: null as (() => void) | null,
   };
-
-  /**
-   * Loads all packages in a directory that directly exports a Plugger instance asynchronously.
-   *
-   * `dir` is the path to the directory, relative to `proccess.cwd()`. Any other packages that
-   * doesn't export a Plugger instance will be silently ignored.
-   *
-   * @category Loader
-   * @param dir - The path to the directory.
-   * @returns A Promise that resolves to the current instance.
-   */
-  async addFolder(dir: string): Promise<this> {
-    const dirPath = process.cwd();
-    const fullPath = path.resolve(dirPath, dir);
-
-    await promisify(fs.access)(path.join(fullPath, "/"));
-
-    const files = await glob(path.join(fullPath, "*/index.{ts,js}"), {
-      absolute: true,
-    });
-    files.forEach((pluginPath: string) => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const plugin = require(path.dirname(pluginPath));
-
-      if (plugin[pluggerIdentifier]) this.addPlugin(plugin);
-      else if (plugin.default[pluggerIdentifier])
-        this.addPlugin(plugin.default);
-    });
-
-    return this;
-  }
-
-  /**
-   * Loads all packages in a directory that directly exports a Plugger instance synchronously.
-   *
-   * `dir` is the path to the directory, relative to `proccess.cwd()`. Any other packages that
-   * doesn't export a Plugger instance will be silently ignored.
-   *
-   * @category Loader
-   * @param dir - The path to the directory.
-   * @returns The current instance.
-   */
-  addFolderSync(dir: string): this {
-    const dirPath = process.cwd();
-    const fullPath = path.resolve(dirPath, dir);
-
-    fs.accessSync(path.join(fullPath, "/"));
-
-    const files = globSync(path.join(fullPath, "*/index.{ts,js}"), {
-      absolute: true,
-    });
-    files.forEach((pluginPath: string) => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const plugin = require(path.dirname(pluginPath));
-
-      if (plugin[pluggerIdentifier]) this.addPlugin(plugin);
-      else if (plugin.default[pluggerIdentifier])
-        this.addPlugin(plugin.default);
-    });
-
-    return this;
-  }
 
   /**
    * Initializes the plugin asynchronously.

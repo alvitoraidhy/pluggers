@@ -1,100 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable max-len */
 import assert from "assert";
-import path from "path";
 import Plugger from "../src/index";
 import { listenerProps } from "../src/constants";
 
 describe("Loader functions test", () => {
   describe("Plugger(name: string)", () => {
-    describe("#addFolder(dirName: string)", () => {
-      it("should load all plugins in a directory", async () => {
-        const parent = new Plugger("parent");
-        await parent.addFolder(
-          path.join(__dirname, "test-files/addFolder-test")
-        );
-
-        ["test1", "test2", "test3"].forEach((name) => {
-          assert.notStrictEqual(parent.getPlugin(name), null);
-        });
-      });
-
-      it("should support relative paths and load all plugins in a directory", async () => {
-        const parent = new Plugger("parent");
-
-        const currentCwd = process.cwd();
-        process.chdir(__dirname);
-        await parent.addFolder("./test-files/addFolder-test");
-        process.chdir(currentCwd);
-
-        ["test1", "test2", "test3"].forEach((name) => {
-          assert.notStrictEqual(parent.getPlugin(name), null);
-        });
-      });
-
-      it("should support absolute paths and load all plugins in a directory", async () => {
-        const parent = new Plugger("parent");
-        await parent.addFolder(
-          path.resolve(__dirname, "./test-files/addFolder-test")
-        );
-
-        ["test1", "test2", "test3"].forEach((name) => {
-          assert.notStrictEqual(parent.getPlugin(name), null);
-        });
-      });
-
-      it("should throw an error if the directory does not exist", async () => {
-        const parent = new Plugger("parent");
-        await assert.rejects(() =>
-          parent.addFolder(path.resolve(__dirname, "./test-files/nonexistent"))
-        );
-      });
-    });
-
-    describe("#addFolderSync(dirName: string)", () => {
-      it("should load all plugins in a directory", () => {
-        const parent = new Plugger("parent");
-        parent.addFolderSync(path.join(__dirname, "test-files/addFolder-test"));
-
-        ["test1", "test2", "test3"].forEach((name) => {
-          assert.notStrictEqual(parent.getPlugin(name), null);
-        });
-      });
-
-      it("should support relative paths and load all plugins in a directory", () => {
-        const parent = new Plugger("parent");
-
-        const currentCwd = process.cwd();
-        process.chdir(__dirname);
-        parent.addFolderSync("./test-files/addFolder-test");
-        process.chdir(currentCwd);
-
-        ["test1", "test2", "test3"].forEach((name) => {
-          assert.notStrictEqual(parent.getPlugin(name), null);
-        });
-      });
-
-      it("should support absolute paths and load all plugins in a directory", () => {
-        const parent = new Plugger("parent");
-        parent.addFolderSync(
-          path.resolve(__dirname, "./test-files/addFolder-test")
-        );
-
-        ["test1", "test2", "test3"].forEach((name) => {
-          assert.notStrictEqual(parent.getPlugin(name), null);
-        });
-      });
-
-      it("should throw an error if the directory does not exist", () => {
-        const parent = new Plugger("parent");
-        assert.throws(() => {
-          parent.addFolderSync(
-            path.resolve(__dirname, "./test-files/nonexistent")
-          );
-        });
-      });
-    });
-
     describe("#initPlugin(plugin: Plugger)", () => {
       it("should initialize the plugin", async () => {
         const parent = new Plugger("parent");
