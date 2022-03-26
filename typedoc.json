@@ -1,7 +1,7 @@
 {
   "name": "Pluggers",
   "entryPoints": ["./src/index.ts", "./src/constants.ts"],
-  "disableOutputCheck": true,
+  "cleanOutputDir": false,
   "includeVersion": true,
   "out": "./docs",
   "sort": ["source-order"],
