@@ -14,9 +14,6 @@ workflows:
       - node/test:
           version: 12.22.1
           run-command: "test"
-      - node/test:
-          version: 10.24.1
-          run-command: "test"
 
   test-with-coverage:
     jobs:
