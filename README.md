@@ -8,7 +8,7 @@ _A convenient plugin manager library._
 
 [pluggers](https://www.npmjs.com/package/pluggers) is designed to make modular projects easier to create. [recursive-install](https://www.npmjs.com/package/recursive-install) is recommended for making plugins truly independent.
 
-**Warning**: there are many breaking changes for those who are upgrading from pre-v2 to v2.
+**Warning**: there are breaking changes for those who are upgrading from pre-v3 to v3.
 
 - [Pluggers](#pluggers)
   - [Features & Plans](#features--plans)
