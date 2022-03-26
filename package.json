@@ -1,6 +1,6 @@
 {
   "name": "pluggers",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "A convenient plugin manager library",
   "directories": {
     "lib": "lib"
