@@ -1,0 +1,87 @@
+<!DOCTYPE html><html class="default"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Pluggers - v2.3.0</title><meta name="description" content="Documentation for Pluggers - v2.3.0"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script async src="assets/search.js" id="search-script"></script></head><body><script>document.body.classList.add(localStorage.getItem("tsd-theme") || "os")</script><header><div class="tsd-page-toolbar"><div class="container"><div class="table-wrap"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget search no-caption">Search</label><input type="text" id="tsd-search-field"/></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">Pluggers - v2.3.0</a></div><div class="table-cell" id="tsd-widgets"><div id="tsd-filter"><a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a><div class="tsd-filter-group"><div class="tsd-select" id="tsd-filter-visibility"><span class="tsd-select-label">All</span><ul class="tsd-select-list"><li data-value="public">Public</li><li data-value="protected">Public/Protected</li><li data-value="private" class="selected">All</li></ul></div> <input type="checkbox" id="tsd-filter-inherited" checked/><label class="tsd-widget" for="tsd-filter-inherited">Inherited</label><input type="checkbox" id="tsd-filter-externals" checked/><label class="tsd-widget" for="tsd-filter-externals">Externals</label></div></div><a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a></div></div></div></div><div class="tsd-page-title"><div class="container"><h1> Pluggers - v2.3.0</h1></div></div></header><div class="container container-main"><div class="row"><div class="col-8 col-content"><div class="tsd-panel tsd-typography">
+<a href="#pluggers" id="pluggers" style="color: inherit; text-decoration: none;">
+  <h1>Pluggers</h1>
+</a>
+<p><a href="https://www.npmjs.com/package/pluggers"><img src="https://img.shields.io/npm/v/pluggers.svg" alt="npm"></a>
+<a href="https://circleci.com/gh/alvitoraidhy/pluggers"><img src="https://circleci.com/gh/alvitoraidhy/pluggers.svg?style=shield" alt="CircleCI"></a>
+<a href="https://codecov.io/gh/alvitoraidhy/pluggers"><img src="https://codecov.io/gh/alvitoraidhy/pluggers/branch/master/graph/badge.svg?token=MZY3IEV0HS" alt="Codecov"></a></p>
+<p><em>A convenient plugin manager library.</em></p>
+<p><a href="https://www.npmjs.com/package/pluggers">pluggers</a> is designed to make modular projects easier to create. <a href="https://www.npmjs.com/package/recursive-install">recursive-install</a> is recommended for making plugins truly independent.</p>
+<p><strong>Warning</strong>: there are many breaking changes for those who are upgrading from pre-v2 to v2.</p>
+<ul>
+<li><a href="#pluggers">Pluggers</a><ul>
+<li><a href="#features--plans">Features &amp; Plans</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#api">API</a></li>
+<li><a href="#how-priorities-work">How Priorities Work</a></li>
+<li><a href="#contributing">Contributing</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+</li>
+</ul>
+
+<a href="#features-amp-plans" id="features-amp-plans" style="color: inherit; text-decoration: none;">
+  <h2>Features &amp; Plans</h2>
+</a>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> <strong>Synchronous</strong> or <strong>Asynchronous</strong> plugin loading</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>Flexible access</strong> between plugins</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>Priority-based</strong> load order (explicit or automatic)</li>
+</ul>
+
+<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+  <h2>Installation</h2>
+</a>
+<p>Use the package manager <strong>npm</strong> to install pluggers.</p>
+<pre><code class="language-bash"><span class="hl-0">npm install --save pluggers</span>
+</code></pre>
+
+<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+  <h2>Usage</h2>
+</a>
+<p><code>./plugin1.js</code></p>
+<pre><code class="language-javascript"><span class="hl-1">// ./plugin1.js</span><br/><span class="hl-2">const</span><span class="hl-0"> </span><span class="hl-3">Plugger</span><span class="hl-0"> = </span><span class="hl-4">require</span><span class="hl-0">(</span><span class="hl-5">&quot;pluggers&quot;</span><span class="hl-0">).</span><span class="hl-6">default</span><span class="hl-0">;</span><br/><br/><span class="hl-2">const</span><span class="hl-0"> </span><span class="hl-3">plugin</span><span class="hl-0"> = </span><span class="hl-2">new</span><span class="hl-0"> </span><span class="hl-4">Plugger</span><span class="hl-0">(</span><span class="hl-5">&quot;plugin1&quot;</span><span class="hl-0">);</span><br/><br/><span class="hl-6">plugin</span><span class="hl-0">.</span><span class="hl-6">pluginCallbacks</span><span class="hl-0">.</span><span class="hl-4">init</span><span class="hl-0"> = () </span><span class="hl-2">=&gt;</span><span class="hl-0"> {</span><br/><span class="hl-0">  </span><span class="hl-2">const</span><span class="hl-0"> </span><span class="hl-3">test</span><span class="hl-0"> = </span><span class="hl-5">&quot;Hello World!&quot;</span><span class="hl-0">;</span><br/><span class="hl-0">  </span><span class="hl-7">return</span><span class="hl-0"> </span><span class="hl-6">test</span><span class="hl-0">;</span><br/><span class="hl-0">};</span><br/><br/><span class="hl-8">module</span><span class="hl-0">.</span><span class="hl-8">exports</span><span class="hl-0"> = </span><span class="hl-6">plugin</span><span class="hl-0">;</span>
+</code></pre>
+<p><code>./plugin2.js</code></p>
+<pre><code class="language-javascript"><span class="hl-1">// ./plugin2.js</span><br/><span class="hl-2">const</span><span class="hl-0"> </span><span class="hl-3">Plugger</span><span class="hl-0"> = </span><span class="hl-4">require</span><span class="hl-0">(</span><span class="hl-5">&quot;pluggers&quot;</span><span class="hl-0">).</span><span class="hl-6">default</span><span class="hl-0">;</span><br/><br/><span class="hl-1">// Error will be thrown if the plugin is using a used name (&quot;plugin1&quot;) when loaded</span><br/><span class="hl-2">const</span><span class="hl-0"> </span><span class="hl-3">plugin</span><span class="hl-0"> = </span><span class="hl-2">new</span><span class="hl-0"> </span><span class="hl-4">Plugger</span><span class="hl-0">(</span><span class="hl-5">&quot;plugin2&quot;</span><span class="hl-0">);</span><br/><br/><span class="hl-1">// Error will be thrown if a plugin named &quot;plugin1&quot; is not loaded</span><br/><span class="hl-6">plugin</span><span class="hl-0">.</span><span class="hl-4">requirePlugin</span><span class="hl-0">({ </span><span class="hl-6">name:</span><span class="hl-0"> </span><span class="hl-5">&quot;plugin1&quot;</span><span class="hl-0"> });</span><br/><br/><span class="hl-6">plugin</span><span class="hl-0">.</span><span class="hl-6">pluginCallbacks</span><span class="hl-0">.</span><span class="hl-4">init</span><span class="hl-0"> = (</span><span class="hl-6">plugins</span><span class="hl-0">) </span><span class="hl-2">=&gt;</span><span class="hl-0"> {</span><br/><span class="hl-0">  </span><span class="hl-2">const</span><span class="hl-0"> { </span><span class="hl-3">plugin1</span><span class="hl-0"> } = </span><span class="hl-6">plugins</span><span class="hl-0">;</span><br/><span class="hl-0">  </span><span class="hl-6">console</span><span class="hl-0">.</span><span class="hl-4">log</span><span class="hl-0">(</span><span class="hl-6">plugin1</span><span class="hl-0">);</span><br/><span class="hl-0">};</span><br/><br/><span class="hl-8">module</span><span class="hl-0">.</span><span class="hl-8">exports</span><span class="hl-0"> = </span><span class="hl-6">plugin</span><span class="hl-0">;</span>
+</code></pre>
+<p><code>./master.js</code></p>
+<pre><code class="language-javascript"><span class="hl-1">// ./master.js</span><br/><span class="hl-2">const</span><span class="hl-0"> </span><span class="hl-3">Plugger</span><span class="hl-0"> = </span><span class="hl-4">require</span><span class="hl-0">(</span><span class="hl-5">&quot;pluggers&quot;</span><span class="hl-0">).</span><span class="hl-6">default</span><span class="hl-0">;</span><br/><br/><span class="hl-1">// Create instance</span><br/><span class="hl-2">const</span><span class="hl-0"> </span><span class="hl-3">master</span><span class="hl-0"> = </span><span class="hl-2">new</span><span class="hl-0"> </span><span class="hl-4">Plugger</span><span class="hl-0">(</span><span class="hl-5">&quot;master&quot;</span><span class="hl-0">);</span><br/><br/><span class="hl-1">// Add plugins</span><br/><span class="hl-6">master</span><span class="hl-0">.</span><span class="hl-4">addPlugin</span><span class="hl-0">(</span><span class="hl-4">require</span><span class="hl-0">(</span><span class="hl-5">&quot;./plugin1&quot;</span><span class="hl-0">));</span><br/><span class="hl-6">master</span><span class="hl-0">.</span><span class="hl-4">addPlugin</span><span class="hl-0">(</span><span class="hl-4">require</span><span class="hl-0">(</span><span class="hl-5">&quot;./plugin2&quot;</span><span class="hl-0">));</span><br/><br/><span class="hl-6">master</span><span class="hl-0">.</span><span class="hl-4">initAll</span><span class="hl-0">().</span><span class="hl-4">then</span><span class="hl-0">(() </span><span class="hl-2">=&gt;</span><span class="hl-0"> {</span><br/><span class="hl-0">  </span><span class="hl-6">console</span><span class="hl-0">.</span><span class="hl-4">log</span><span class="hl-0">(</span><span class="hl-5">&quot;Complete!&quot;</span><span class="hl-0">);</span><br/><span class="hl-0">});</span>
+</code></pre>
+<p>The above codes will print &quot;Hello World!&quot; and then &quot;Complete!&quot; if <code>master.js</code> is executed.</p>
+
+<a href="#api" id="api" style="color: inherit; text-decoration: none;">
+  <h2>API</h2>
+</a>
+<p>Check out <a href="https://alvitoraidhy.github.io/pluggers/">this documentation page</a>.</p>
+
+<a href="#how-priorities-work" id="how-priorities-work" style="color: inherit; text-decoration: none;">
+  <h2>How Priorities Work</h2>
+</a>
+<p>There are 3 types of priorities that can be used, in order of the load order:</p>
+<ul>
+<li><p><strong>Positive priority</strong>, which is from <code>0</code> to <code>Infinity</code>.<br>Plugins with positive number priorities will be initialized with the order from the lowest number (<code>0</code>) to the highest number (<code>Infinity</code>).</p>
+</li>
+<li><p><strong>Undefined priority</strong><br>Plugins with undefined priorities will be initialized after plugins with positive number priorities with the order of which plugin gets loaded with <code>addPlugin()</code> first.</p>
+</li>
+<li><p><strong>Negative priority</strong>, which is from <code>-Infinity</code> to <code>-1</code>.<br>Negative priorities work like how negative indexes work in Python (ex: a plugin with the priority of <code>-1</code> will be initialized last, <code>-2</code> will be initialized second last, etc). Plugins with negative priorities will be processed after plugins with positive number priorities and undefined priorities, with the order from the lowest number (<code>-Infinity</code>) to the highest number (<code>-1</code>), and will be initialized according to their respective priorities.</p>
+</li>
+</ul>
+<p>All types of priorities are stackable, for example:</p>
+<pre><code class="language-javascript"><span class="hl-0">...</span><br/><span class="hl-6">loader</span><span class="hl-0">.</span><span class="hl-4">addPlugin</span><span class="hl-0">(</span><span class="hl-6">plugin1</span><span class="hl-0">, { </span><span class="hl-6">priority:</span><span class="hl-0"> </span><span class="hl-9">1</span><span class="hl-0"> }); </span><span class="hl-1">// this will be initialized first</span><br/><span class="hl-6">loader</span><span class="hl-0">.</span><span class="hl-4">addPlugin</span><span class="hl-0">(</span><span class="hl-6">plugin2</span><span class="hl-0">, { </span><span class="hl-6">priority:</span><span class="hl-0"> </span><span class="hl-9">1</span><span class="hl-0"> }); </span><span class="hl-1">// this will be initialized after &#39;plugin1&#39;. Note that its priority is the same as &#39;plugin1&#39;</span><br/><br/><span class="hl-6">loader</span><span class="hl-0">.</span><span class="hl-4">initAll</span><span class="hl-0">();</span>
+</code></pre>
+<p>Because of their nature, plugins with negative priorities will be processed differently:</p>
+<pre><code class="language-javascript"><span class="hl-0">...</span><br/><span class="hl-6">loader</span><span class="hl-0">.</span><span class="hl-4">addPlugin</span><span class="hl-0">(</span><span class="hl-6">plugin1</span><span class="hl-0">, { </span><span class="hl-6">priority:</span><span class="hl-0"> </span><span class="hl-9">1</span><span class="hl-0"> }); </span><span class="hl-1">// this will be initialized first</span><br/><span class="hl-6">loader</span><span class="hl-0">.</span><span class="hl-4">addPlugin</span><span class="hl-0">(</span><span class="hl-6">plugin2</span><span class="hl-0">, { </span><span class="hl-6">priority:</span><span class="hl-0"> </span><span class="hl-9">1</span><span class="hl-0"> });</span><br/><br/><span class="hl-6">loader</span><span class="hl-0">.</span><span class="hl-4">addPlugin</span><span class="hl-0">(</span><span class="hl-6">plugin3</span><span class="hl-0">, { </span><span class="hl-6">priority:</span><span class="hl-0"> -</span><span class="hl-9">2</span><span class="hl-0"> }) </span><span class="hl-1">// this will be initialized after &#39;plugin1&#39;, before &#39;plugin2&#39;</span><br/><span class="hl-6">loader</span><span class="hl-0">.</span><span class="hl-4">addPlugin</span><span class="hl-0">(</span><span class="hl-6">plugin4</span><span class="hl-0">, { </span><span class="hl-6">priority:</span><span class="hl-0"> -</span><span class="hl-9">1</span><span class="hl-0"> }) </span><span class="hl-1">// this will be initialized after &#39;plugin2&#39;</span><br/><br/><span class="hl-6">loader</span><span class="hl-0">.</span><span class="hl-4">initAll</span><span class="hl-0">(); </span><span class="hl-1">// Load order: &#39;plugin1&#39;, &#39;plugin3&#39;, &#39;plugin2&#39;, &#39;plugin4&#39;</span>
+</code></pre>
+
+<a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
+  <h2>Contributing</h2>
+</a>
+<p>Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.</p>
+
+<a href="#license" id="license" style="color: inherit; text-decoration: none;">
+  <h2>License</h2>
+</a>
+<p><a href="https://choosealicense.com/licenses/mit/">MIT</a></p>
+</div></div><div class="col-4 col-menu menu-sticky-wrap menu-highlight"><nav class="tsd-navigation primary"><ul><li class="current"><a href="modules.html">Modules</a></li><li class=" tsd-kind-module"><a href="modules/constants.html">constants</a></li><li class=" tsd-kind-module"><a href="modules/index.html">index</a></li></ul></nav></div></div></div><footer class="with-border-bottom"><div class="container"><h2>Legend</h2><div class="tsd-legend-group"><ul class="tsd-legend"><li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li></ul><ul class="tsd-legend"><li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li></ul></div><h2>Settings</h2><p>Theme <select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></p></div></footer><div class="container tsd-generator"><p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div><div class="overlay"></div><script src="assets/main.js"></script></body></html>
